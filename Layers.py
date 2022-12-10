@@ -148,7 +148,7 @@ class Activation_Layer(Layer):
     """
 
     def __init__(self, activation = "ReLU"):
-        self.activation = self.activation()
+        self.activation = func.get_activation_instance(activation)
         self.n_units = n_units
     
     def forwardprop(self, input):
