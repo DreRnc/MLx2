@@ -31,9 +31,3 @@ def main():
     
     # Print results
     print(y_pred)
-
-
-print('ciao')
-print('ciaociao')
-print('panna')
-print('cioccolato')
