@@ -11,5 +11,6 @@ class MLP:
     def predict(self, X):
         pass
 
-
+print("cambiamento a caso")
+a = 1
 
