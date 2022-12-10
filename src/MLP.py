@@ -31,3 +31,6 @@ def main():
     
     # Print results
     print(y_pred)
+
+
+print('ciao')
