@@ -1,4 +1,7 @@
 import numpy as np
+import Functions as func
+
+
 
 class Layer:
 
@@ -42,7 +45,7 @@ class Layer:
     
 
 
-class Fully_Connected(Layer):
+class Fully_Connected_Layer(Layer):
 
     """
     A Fully Connected layer is a collection of neurons that are fully connected to the previous layer.
@@ -108,13 +111,13 @@ class Fully_Connected(Layer):
         self._weights = params["weights"]
         self._biases = params["biases"]
 
-    def forwardprop(self, X):
+    def forwardprop(self, input):
         """
         Perform linear transformation to input
 
         Parameters
         ----------
-        X (vect) inputs for forward propagation from previous layer
+        input (vect) inputs for forward propagation from previous layer
 
         Returns
         -------
@@ -132,15 +135,43 @@ class Fully_Connected(Layer):
 
 
 
-class Activation(Layer):
+
+
+class Activation_Layer(Layer):
 
     """
     An activation layer applies an activation function to the output of a layer
 
+    Updates Needed
+    --------------
+    Checks on correct activation functions, implementation of aliases
     """
 
-    def __init__(self, activation_function = "Relu", ):
-        
+    def __init__(self, activation = "ReLU"):
+        self.activation = self.activation()
+        self.n_units = n_units
+    
+    def forwardprop(self, input):
+        """
+        Applies activation function to input.
+
+        Parameters
+        ----------
+        input (vect) inputs for forward propagation from previous layer
+
+        Returns
+        -------
+        Vector of outputs (one for each unit).
+
+        """
+        return self.activation(input)
+
+    def backprop(self):
+
+
+
+
+
 
 
 

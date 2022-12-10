@@ -16,11 +16,11 @@ class Sigmoid():
     def derivative(self, x):
         return self(x) * (1 - self(x))
 
-def ReLuF(x):
+def ReLUF(x):
     return np.maximum(0, x)
 class ReLU():
     def __call__(self, x):
-        return ReLuF(x)
+        return ReLUF(x)
     def derivative(self, x):
         return (x > 0).astype(int)
 
@@ -72,16 +72,12 @@ def Accuracy(y, y_pred):
 
 
 
+def get_activation_instance(str):
+    if str in ("Sigm", "sigm", "Sigmoid", "sigmoid"):
+        return Sigmoid()
+    elif str in ...
 
-
-
-
-
-
-
-
-
-
+### Duracell quando hai fatto superclasse poi aggiungi anche gli alias così pls
 
 
 
