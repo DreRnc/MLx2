@@ -1,6 +1,6 @@
 import numpy as np
 #from Functions import #_inseriscisuperclasse_
-from Functions import get_activation_instance
+from ActivationFunctions import GetActivationFunction
 
 
 
