@@ -1,21 +1,5 @@
 import numpy as np
 
-
-"""
-
-Note per duro:
-
-commenta le cose, se hai sbatti fallo seguendo il format che ho messo nella funzione sotto,
-sennò tranqui non cambia molto, è solo più comodo per scrivere in vscode
-
-introduci la activation function tanh, giusto per completezza
-
-definisci superclassi RegularizationFunction, ActivationFunction, CostFunction,
-implementando come sottoclassi il resto
-    
-"""
-
-
 def IdentityF(x):
     return x
 class Identity():
@@ -32,11 +16,11 @@ class Sigmoid():
     def derivative(self, x):
         return self(x) * (1 - self(x))
 
-def ReLUF(x):
+def ReLuF(x):
     return np.maximum(0, x)
 class ReLU():
     def __call__(self, x):
-        return ReLUF(x)
+        return ReLuF(x)
     def derivative(self, x):
         return (x > 0).astype(int)
 
@@ -88,11 +72,8 @@ def Accuracy(y, y_pred):
 
 
 
-def get_activation_instance(alias):
 
 
-    """
-    Retrieves application function object instance
 
     Parameters
     ----------
