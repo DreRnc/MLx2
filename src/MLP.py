@@ -23,7 +23,7 @@ class MLP:
 
     """
 
-    def __init__(self, n_layers, layer_units, input_size, output_size, activation_function="Sigm"):
+    def __init__(self, n_hidden_layers, hidden_layer_units, input_size, output_size, activation_function="Sigm"):
 
         """
         Build MLP 
@@ -36,20 +36,13 @@ class MLP:
         """
         self.layers = []
 
-        #all_layer_units = [input_size, layer_units, output_size]
+        layer_units = [input_size, hidden_layer_units, output_size]
 
-        for l in range(n_layers):
-            print('adding hidden layer')
-            if l == 0:
-                new_layer = Dense(layer_units[l], input_size, activation_function)
-            else:
-                new_layer = Dense(layer_units[l], layer_units[l-1], activation_function)
+        for l in range(n_hidden_layers):
+            new_layer = Dense(layer_units[l], layer_units[l-1], activation_function)
             self.add_layer(new_layer)
         
-        if n_layers > 0:
-            output_layer = Fully_Connected_Layer(output_size, layer_units[n_layers-1])
-        else:
-            output_layer = Fully_Connected_Layer(output_size, input_size)
+        output_layer = Fully_Connected_Layer(output_size, input_size)
 
         self.add_layer(output_layer)
 
