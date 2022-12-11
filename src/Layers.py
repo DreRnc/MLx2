@@ -173,11 +173,6 @@ class Activation_Layer(Layer):
 
 
 
-
-
-
-
-
 class Dense(Layer):
 
     """

@@ -38,7 +38,8 @@ class MLP:
 
         #all_layer_units = [input_size, layer_units, output_size]
 
-        for l in range(n_layers-1):
+        for l in range(n_layers):
+            print('adding hidden layer')
             if l == 0:
                 new_layer = Dense(layer_units[l], input_size, activation_function)
             else:
@@ -116,7 +117,7 @@ class MLP:
         n_batches = math.ceil(n_samples/self.batch_size)
         batches = [{"X" : X[b * batch_size : (b+1)*batch_size], \
             "y_true" :  y_true[b * batch_size : (b+1)*batch_size]} \
-            for b in range(n_batches - 1)]
+            for b in range(n_batches)]
         batches.append({"X" : X[(n_batches-1) * batch_size : -1], "y_true" : y_true[(n_batches-1) * batch_size : -1]})
         
         for batch in batches:
