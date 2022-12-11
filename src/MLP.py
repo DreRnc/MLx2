@@ -3,7 +3,7 @@ import math
 
 from Layers import Layer, Fully_Connected_Layer, Dense
 
-from Functions import get_activation_instance
+from ActivationFunctions import GetActivationFunction
 
 class MLP:
 
