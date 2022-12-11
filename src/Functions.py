@@ -1,5 +1,21 @@
 import numpy as np
 
+
+"""
+
+Note per duro:
+
+commenta le cose, se hai sbatti fallo seguendo il format che ho messo nella funzione sotto,
+sennò tranqui non cambia molto, è solo più comodo per scrivere in vscode
+
+introduci la activation function tanh, giusto per completezza
+
+definisci superclassi RegularizationFunction, ActivationFunction, CostFunction,
+implementando come sottoclassi il resto
+    
+"""
+
+
 def IdentityF(x):
     return x
 class Identity():
@@ -72,12 +88,29 @@ def Accuracy(y, y_pred):
 
 
 
-def get_activation_instance(str):
-    if str in ("Sigm", "sigm", "Sigmoid", "sigmoid"):
-        return Sigmoid()
-    elif str in ...
-
-### Duracell quando hai fatto superclasse poi aggiungi anche gli alias così pls
+def get_activation_instance(alias):
 
 
+    """
+    Retrieves application function object instance
 
+    Parameters
+    ----------
+    alias (str) : name or alias of activation function 
+
+    Returns
+    -------
+    activation function object : object required
+
+    """
+
+    match alias:
+
+        case "Sigm" | "sigm" | "Sigmoid" | "sigmoid":
+            return Sigmoid()
+        case "Relu" | "relu" | "ReLU" :
+            return ReLU()
+        case "tanh" | "Tanh" | "TanH":
+            return Tanh()
+        case _:
+            raise ValueError("No activation function with that name!")
