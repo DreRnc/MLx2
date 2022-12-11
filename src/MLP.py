@@ -1,7 +1,7 @@
 import numpy as np
 import math
 
-from Layers import Layer, FullyConnected, Dense
+from Layers import Layer, Fully_Connected_Layer, Dense
 
 from Functions import get_activation_instance, get_regularization_instance, get_error_function
 
@@ -12,8 +12,6 @@ class MLP:
 
     Attributes
     -----------
-
-    n_layers: number of hidden layers
     layers: list of layers
 
     Methods
@@ -36,8 +34,6 @@ class MLP:
         layer_units : list containing the number of units for each layer
 
         """
-
-        self.n_layers = 0
         self.layers = []
 
         for l in range(n_layers-1):
@@ -47,7 +43,7 @@ class MLP:
                 new_layer = Dense(layer_units[l-1], layer_units[l], activation_function)
             self.add_layer(new_layer)
         
-        output_layer = FullyConnected(layer_units[n_layers-1], output_size)
+        output_layer = Fully_Connected_Layer(layer_units[n_layers-1], output_size)
 
         self.add_layer(output_layer)
 
@@ -65,7 +61,6 @@ class MLP:
 
         """
         self.layers.append(new_layer)
-        self.n_layers += 1
 
     def predict(self, X):
 
