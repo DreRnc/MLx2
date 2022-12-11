@@ -25,7 +25,7 @@ class MLP:
 
     """
 
-    def __init__(self, n_layers, layer_units):
+    def __init__(self, n_layers, layer_units, input_size, output_size, activation_function="Sigm"):
 
         """
         Build MLP 
@@ -39,15 +39,25 @@ class MLP:
 
         self.n_layers = 0
         self.layers = []
-        for l in range(n_layers):
-            new_layer = Dense(layer_units[l-1], layer_units[l])
+
+        for l in range(n_layers-1):
+            if l == 0:
+                new_layer = Dense(input_size, layer_units[l], activation_function)
+            else:
+                new_layer = Dense(layer_units[l-1], layer_units[l], activation_function)
             self.add_layer(new_layer)
+        
+        output_layer = FullyConnected(layer_units[n_layers-1], output_size)
+
+        self.add_layer(output_layer)
 
 
     def add_layer(self, new_layer):
 
         """
         Add new layer to layers
+        
+        (Forse per ora messa così è inutile?)
 
         Parameters
         -----------
@@ -114,15 +124,15 @@ class MLP:
         batches.append({"X" : X[(n_batches-1) * batch_size : -1], "y_true" : y_true[(n_batches-1) * batch_size : -1]})
         
         for batch in batches:
-            
+
             for layer in self.layers:
                 layer.get_params["weigths"]
-                grad_weigths = layer.backprop(X[sample], y[sample])
-                new_weigths = optimization_algorithm(weigths, optimization_step, grad_weigths)
+
+                grad_weigths = layer.backprop(batch["X"], batch["y"])
+
+                new_weigths = layer.weigths - optimization_step * grad_weigths
                 layer.set_params({"weigths" : new_weigths})
 
-        
-        return        
         
     
 
