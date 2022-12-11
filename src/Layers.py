@@ -1,4 +1,8 @@
 import numpy as np
+#from Functions import #_inseriscisuperclasse_
+from Functions import get_activation_instance
+
+
 
 class Layer:
 
@@ -42,13 +46,20 @@ class Layer:
     
 
 
-class Fully_Connected(Layer):
+class Fully_Connected_Layer(Layer):
 
     """
     A Fully Connected layer is a collection of neurons that are fully connected to the previous layer.
 
+
+    W_ij is the weight of unit i for input j.
+    self._weights is a marix with dimensions (n_units x n_units_per_input)
+    self._biases is a vector with dimension n_units
+    
     """
+    
     def __init__(self, n_units, n_inputs_per_unit, weights_scale = 0.01):
+
         """
         Initialize a fully connected layer.
         
@@ -58,11 +69,32 @@ class Fully_Connected(Layer):
         n_inputs_per_unit (int): number of inputs per unit (units in layer before)
         weights_scale (int): scale for initialization of weights
 
+
+        Updates Needed
+        --------------
+        Must add randomization for weights
+
         """
 
         self.n_units = n_units
         self.n_input_per_unit = n_inputs_per_unit
-        self.weights_scale = weights_scale
+        self._weights = np.ones((n_units, n_inputs_per_unit)) * weights_scale
+        self._biases = np.ones(n_units) * weights_scale
+
+    def get_params(self):
+
+        """
+        Gets the parameters from the layer.
+
+        Returns
+        ----------
+        Dictionary of parameters from the layer. 
+            "weights" is a matrix
+            "bias" is a vector
+
+        """
+
+        return {"weights": self._weights.copy(), "biases": self._biases.copy()}
 
     def set_params(self, params):
 
@@ -80,38 +112,71 @@ class Fully_Connected(Layer):
         self._weights = params["weights"]
         self._biases = params["biases"]
 
-    def forwardprop(self, X):
+    def forwardprop(self, input):
         """
         Perform linear transformation to input
 
         Parameters
         ----------
-        X (vect)
+        input (vect) inputs for forward propagation from previous layer
 
         Returns
         -------
         Vector of outputs (one for each unit).
+
         """
+
         if np.shape(self._biases) != self.n_units:
-            raise "Dimension Error!"
-        return np.matmul(self._weights,X) + self._biases
+            raise Exception("Dimension Error!")
+        return np.matmul(self._weights, input) + self._biases
 
-    def backprop(self,)
+    def backprop(self):
+        pass
 
 
 
-class Activation(Layer):
+
+
+
+
+class Activation_Layer(Layer):
 
     """
     An activation layer applies an activation function to the output of a layer
 
+    Updates Needed
+    --------------
+    Checks on correct activation functions, implementation of aliases
     """
+
+    def __init__(self, n_units, activation = "ReLU"):
+        self.activation = get_activation_instance(activation)
+        self.n_units = n_units
+    
+    def forwardprop(self, input):
+        """
+        Applies activation function to input.
+
+        Parameters
+        ----------
+        input (vect) inputs for forward propagation from previous layer
+
+        Returns
+        -------
+        Vector of outputs (one for each unit).
+
+        """
+        return self.activation(input)
+
+    def backprop(self):
+        pass
 
 
 
 class Dense(Layer):
 
     """
+
     A Dense layer is a fully connected layer with an activation function
 
     """

@@ -1,21 +1,88 @@
 import numpy as np
 import math
 
-from Layers.py import layer, 
+from Layers import Layer, Fully_Connected_Layer, Dense
+
+from Functions import get_activation_instance
 
 class MLP:
-    def __init__(self, n_layers, units_per_layer):
-        self.n_layers = 0
-        self.layers = []
-        for l in range(n_layers):
-            self.add_layer(units_per_layer[l])
 
-    def add_layer(self, n_units):
-        new_layer = Dense(n_units)
+    """
+    MLP class:
+
+    Attributes
+    -----------
+    layers: list of layers
+
+    Methods
+    --------
+
+    add_layer: adds new layer to layers
+    predict: computes y_pred
+    fit: fits MLP weigths on the given training set
+
+    """
+
+    def __init__(self, n_layers, layer_units, input_size, output_size, activation_function="Sigm"):
+
+        """
+        Build MLP 
+
+        Parameters
+        -----------
+        n_layers : number of layers
+        layer_units : list containing the number of units for each layer
+
+        """
+        self.layers = []
+
+        #all_layer_units = [input_size, layer_units, output_size]
+
+        for l in range(n_layers):
+            print('adding hidden layer')
+            if l == 0:
+                new_layer = Dense(layer_units[l], input_size, activation_function)
+            else:
+                new_layer = Dense(layer_units[l], layer_units[l-1], activation_function)
+            self.add_layer(new_layer)
+        
+        if n_layers > 0:
+            output_layer = Fully_Connected_Layer(output_size, layer_units[n_layers-1])
+        else:
+            output_layer = Fully_Connected_Layer(output_size, input_size)
+
+        self.add_layer(output_layer)
+
+
+    def add_layer(self, new_layer):
+
+        """
+        Add new layer to layers
+        
+        (Forse per ora messa così è inutile?)
+
+        Parameters
+        -----------
+        new_layer
+
+        """
         self.layers.append(new_layer)
-        self.n_layers += 1
 
     def predict(self, X):
+
+        """
+        Computes the predicted outputs of the MLP 
+
+        Parameters
+        -----------
+        X : input matrix (n_samples x n_features)
+
+        Returns
+        -------
+        y_pred : output vector (n_samples)
+
+        """
+
         n_samples = X.shape[0]
         y_pred = np.empty(n_samples)
         for sample in range(n_samples):
@@ -27,21 +94,42 @@ class MLP:
         return y_pred
 
     
-    def fit(self, X, y_true, batch_size, optimization_algorithm):
+    def fit(self, X, y_true, batch_size, optimization_step, regularization_function_str, error_function_str):
+
+        """
+        (TO BE COMPLETED)
+
+        Fits the weigths of the MLP 
+
+        Parameters
+        -----------
+        X : input matrix (n_samples x n_features)
+        y_true : target outputs (n_samples)
+
+        batch_size : 
+        optimization_algorithm :
+        regularization_function : 
+        cost_function :
+
+        """
+
         n_samples = X.shape[0]
-        n_batches = math.ceil(n_samples/batch_size)
-        batch = 0
+        n_batches = math.ceil(n_samples/self.batch_size)
+        batches = [{"X" : X[b * batch_size : (b+1)*batch_size], \
+            "y_true" :  y_true[b * batch_size : (b+1)*batch_size]} \
+            for b in range(n_batches)]
+        batches.append({"X" : X[(n_batches-1) * batch_size : -1], "y_true" : y_true[(n_batches-1) * batch_size : -1]})
         
-        for batch in range(n_batches):
-            y_pred = self.predict(X[batch * batch_size : (batch+1)*batch_size])
-            
+        for batch in batches:
+
             for layer in self.layers:
-                grad_input = layer.backpropagation
+                layer.get_params["weigths"]
 
+                grad_weigths = layer.backprop(batch["X"], batch["y"])
 
+                new_weigths = layer.weigths - optimization_step * grad_weigths
+                layer.set_params({"weigths" : new_weigths})
 
-        
-        return        
         
     
 
