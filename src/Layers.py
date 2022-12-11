@@ -78,7 +78,7 @@ class Fully_Connected_Layer(Layer):
 
         self.n_units = n_units
         self.n_input_per_unit = n_inputs_per_unit
-        self._weights = np.ones(n_units, n_inputs_per_unit) * weights_scale
+        self._weights = np.ones((n_units, n_inputs_per_unit)) * weights_scale
         self._biases = np.ones(n_units) * weights_scale
 
     def get_params(self):

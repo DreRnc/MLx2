@@ -40,15 +40,15 @@ class MLP:
 
         for l in range(n_layers-1):
             if l == 0:
-                new_layer = Dense(input_size, layer_units[l], activation_function)
+                new_layer = Dense(layer_units[l], input_size, activation_function)
             else:
-                new_layer = Dense(layer_units[l-1], layer_units[l], activation_function)
+                new_layer = Dense(layer_units[l], layer_units[l-1], activation_function)
             self.add_layer(new_layer)
         
         if n_layers > 0:
-            output_layer = Fully_Connected_Layer(layer_units[n_layers-1], output_size)
+            output_layer = Fully_Connected_Layer(output_size, layer_units[n_layers-1])
         else:
-            output_layer = Fully_Connected_Layer(input_size, output_size)
+            output_layer = Fully_Connected_Layer(output_size, input_size)
 
         self.add_layer(output_layer)
 
