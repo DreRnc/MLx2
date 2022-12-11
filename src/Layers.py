@@ -1,5 +1,5 @@
 import numpy as np
-from Functions import #_inseriscisuperclasse_
+#from Functions import #_inseriscisuperclasse_
 from Functions import get_activation_instance
 
 
@@ -131,6 +131,7 @@ class Fully_Connected_Layer(Layer):
         return np.matmul(self._weights,X) + self._biases
 
     def backprop(self):
+        pass
 
 
 
@@ -148,8 +149,8 @@ class Activation_Layer(Layer):
     Checks on correct activation functions, implementation of aliases
     """
 
-    def __init__(self, activation = "ReLU"):
-        self.activation = func.get_activation_instance(activation)
+    def __init__(self, n_units, activation = "ReLU"):
+        self.activation = get_activation_instance(activation)
         self.n_units = n_units
     
     def forwardprop(self, input):
@@ -168,6 +169,7 @@ class Activation_Layer(Layer):
         return self.activation(input)
 
     def backprop(self):
+        pass
 
 
 

@@ -3,7 +3,7 @@ import math
 
 from Layers import Layer, Fully_Connected_Layer, Dense
 
-from Functions import get_activation_instance, get_regularization_instance, get_error_function
+from Functions import get_activation_instance
 
 class MLP:
 
@@ -36,6 +36,8 @@ class MLP:
         """
         self.layers = []
 
+        #all_layer_units = [input_size, layer_units, output_size]
+
         for l in range(n_layers-1):
             if l == 0:
                 new_layer = Dense(input_size, layer_units[l], activation_function)
@@ -43,7 +45,10 @@ class MLP:
                 new_layer = Dense(layer_units[l-1], layer_units[l], activation_function)
             self.add_layer(new_layer)
         
-        output_layer = Fully_Connected_Layer(layer_units[n_layers-1], output_size)
+        if n_layers > 0:
+            output_layer = Fully_Connected_Layer(layer_units[n_layers-1], output_size)
+        else:
+            output_layer = Fully_Connected_Layer(input_size, output_size)
 
         self.add_layer(output_layer)
 
@@ -106,10 +111,6 @@ class MLP:
         cost_function :
 
         """
-
-
-        regularization_function = get_regularization_instance(regularization_function_str)
-        error_function = get_error_function(error_function_str)
 
         n_samples = X.shape[0]
         n_batches = math.ceil(n_samples/self.batch_size)
