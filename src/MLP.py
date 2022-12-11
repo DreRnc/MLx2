@@ -16,6 +16,8 @@ class MLP:
     n_layers: number of hidden layers
     layers: list of layers
 
+    (questi boh vediamo)
+
     batch_size = 1;
     optimization_algorithm = gradient_descent()
     cost_function = MSE()
@@ -97,13 +99,14 @@ class MLP:
     def fit(self, X, y_true):
 
         """
+        (TO BE COMPLETED)
+
         Fits the weigths of the MLP 
 
         Parameters
         -----------
         X : input matrix (n_samples x n_features)
         y_true : target outputs (n_samples)
-
 
         """
 
