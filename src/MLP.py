@@ -127,9 +127,10 @@ class MLP:
                 y_true_batch = y_true[batch * batch_size : -1]
 
             y_pred_batch = self.predict(X_batch)
+            print(error_function(y_true_batch, y_pred_batch))
+            
             grad_outputs = error_function.derivative(y_true_batch, y_pred_batch)
-            print(grad_outputs)
-
+            
             for layer in self.layers:
 
                 grad_inputs = layer.backprop(grad_outputs)

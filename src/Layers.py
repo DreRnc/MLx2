@@ -130,7 +130,7 @@ class Fully_Connected_Layer(Layer):
             raise Exception("Dimension Error!")
         return np.matmul(self._weights, input) + self._biases
 
-    def backprop(self):
+    def backprop(self, grad_output):
         pass
 
 
