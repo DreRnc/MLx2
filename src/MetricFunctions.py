@@ -58,7 +58,7 @@ class MSE(ErrorFunction):
     IMPORTANT TO BE DONE MAYBE WE SHOULD DEVIDE THE ERROR BY 2 TO SIMPLIFY BACK PRO.
     Methods:
         __call__(self,y_true, y_pred): Returns the mean squared error
-            Input: 2 np.arrays of the same shape
+            Input: 2 np.arrays of the same shape In the case of more than one output the array must have the shape (n_samples, n_outputs)
                 y_true: np.array of the true values
                 y_pred: np.array of the predicted values
             Output: Float
@@ -82,7 +82,7 @@ class MAE(ErrorFunction):
     Computes the mean absolute error between two np.arrays of all sizes
     Methods:
         __call__(self,y_true, y_pred): Returns the mean absolute error
-            Input: 2 np.arrays of the same shape
+            Input: 2 np.arrays of the same shape. In the case of more than one output the array must have the shape (n_samples, n_outputs)
                 y_true: np.array of the true values
                 y_pred: np.array of the predicted values
             Output: Float
@@ -94,12 +94,12 @@ class MAE(ErrorFunction):
     def __call__(self, y_true, y_pred):
         if y_true.shape != y_pred.shape:
             raise ValueError("inputs must have the same shape")
-        return np.mean(np.linalg.norm(y_pred - y_true, axis=1))
+        return np.mean(np.abs(y_pred - y_true))
 
     def derivative(self, y_true, y_pred):
         if y_true.shape != y_pred.shape:
             raise ValueError("inputs must have the same shape")
-        return (y_pred - y_true) / np.linalg.norm(y_pred - y_true, axis = 1, keepdims = True) / y_true.shape[0]
+        return (y_pred - y_true) / np.mean(np.abs(y_pred - y_true)) / y_true.shape[0]
 
 
 def GetMetricFunction(metric):
