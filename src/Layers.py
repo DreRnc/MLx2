@@ -1,6 +1,6 @@
 import numpy as np
-from Functions import #_inseriscisuperclasse_
-from Functions import get_activation_instance
+#from Functions import #_inseriscisuperclasse_
+from ActivationFunctions import GetActivationFunction
 
 
 
@@ -78,7 +78,7 @@ class Fully_Connected_Layer(Layer):
 
         self.n_units = n_units
         self.n_input_per_unit = n_inputs_per_unit
-        self._weights = np.ones(n_units, n_inputs_per_unit) * weights_scale
+        self._weights = np.ones((n_units, n_inputs_per_unit)) * weights_scale
         self._biases = np.ones(n_units) * weights_scale
 
     def get_params(self):
@@ -128,9 +128,10 @@ class Fully_Connected_Layer(Layer):
 
         if np.shape(self._biases) != self.n_units:
             raise Exception("Dimension Error!")
-        return np.matmul(self._weights,X) + self._biases
+        return np.matmul(self._weights, input) + self._biases
 
     def backprop(self):
+        pass
 
 
 
@@ -148,8 +149,8 @@ class Activation_Layer(Layer):
     Checks on correct activation functions, implementation of aliases
     """
 
-    def __init__(self, activation = "ReLU"):
-        self.activation = func.get_activation_instance(activation)
+    def __init__(self, n_units, activation = "ReLU"):
+        self.activation = get_activation_instance(activation)
         self.n_units = n_units
     
     def forwardprop(self, input):
@@ -168,11 +169,7 @@ class Activation_Layer(Layer):
         return self.activation(input)
 
     def backprop(self):
-
-
-
-
-
+        pass
 
 
 
