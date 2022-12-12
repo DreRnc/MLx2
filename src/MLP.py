@@ -36,6 +36,8 @@ class MLP:
 
         """
         self.layers = []
+        self.input_size = input_size
+        self.output_size = output_size
 
         layer_units = [input_size, hidden_layer_units, output_size]
 
@@ -76,9 +78,12 @@ class MLP:
         y_pred : output vector (n_samples)
 
         """
+        
+        (n_samples, input_size) = X.shape
+        if input_size != self.input_size:
+            raise Exception("Dimension Error!")
 
-        n_samples = X.shape[0]
-        y_pred = np.empty(n_samples)
+        y_pred = np.empty(n_samples, self.output_size)
         for sample in range(n_samples):
             tmp = X[sample]
             for layer in self.layers:
