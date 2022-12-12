@@ -121,13 +121,14 @@ class MLP:
 
             if batch != n_batches - 1 :
                 X_batch = X[batch * batch_size : (batch+1)*batch_size]
-                y_true_batch = y_true[b * batch_size : (batch+1)*batch_size]
+                y_true_batch = y_true[batch * batch_size : (batch+1)*batch_size]
             else:
                 X_batch = X[batch * batch_size : -1]
                 y_true_batch = y_true[batch * batch_size : -1]
 
             y_pred_batch = self.predict(X_batch)
             grad_outputs = error_function.derivative(y_true_batch, y_pred_batch)
+            print(grad_outputs)
 
             for layer in self.layers:
 
