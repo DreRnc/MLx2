@@ -94,7 +94,7 @@ class MLP:
         return y_pred
 
     
-    def fit(self, X, y_true, batch_size, error_function_str, regularization_function_str):
+    def fit(self, X, y_true, batch_size, error_function_str, regularization_function_str = "noreg"):
 
         """
 
@@ -112,12 +112,12 @@ class MLP:
         """
 
         n_samples = X.shape[0]
-        n_batches = math.ceil(n_samples/self.batch_size)
+        n_batches = math.ceil(n_samples/batch_size)
 
         error_function = GetMetricFunction(error_function_str)
         #regularization_function = GetRegularizationFunction(regularization_function_str)
         
-        for batch in n_batches:
+        for batch in range(n_batches):
 
             if batch != n_batches - 1 :
                 X_batch = X[batch * batch_size : (batch+1)*batch_size]
