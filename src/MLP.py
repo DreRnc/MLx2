@@ -2,7 +2,8 @@ import numpy as np
 import math
 
 from Layers import Layer, Fully_Connected_Layer, Dense
-
+from MetricFunctions import GetMetricFunction
+from RegularizationFunctions import GetRegularizationFunction
 from ActivationFunctions import GetActivationFunction
 
 class MLP:
@@ -79,30 +80,29 @@ class MLP:
         n_samples = X.shape[0]
         y_pred = np.empty(n_samples)
         for sample in range(n_samples):
-            layer_output = X[sample]
+            tmp = X[sample]
             for layer in self.layers:
-                layer_input = layer_output
-                layer_output = layer.forward_propagation(layer_input)
-            y_pred[sample] = layer_output
+                layer.input = tmp
+                layer.output = layer.forward_propagation(layer_input)
+                tmp = layer.output
+            y_pred[sample] = layer.output
         return y_pred
 
     
-    def fit(self, X, y_true, batch_size, optimization_step, regularization_function_str, error_function_str):
+    def fit(self, X, y_true, batch_size, error_function_str, regularization_function_str):
 
         """
-        (TO BE COMPLETED)
 
-        Fits the weigths of the MLP 
+        Fits the weigths and biases of the MLP 
 
         Parameters
         -----------
         X : input matrix (n_samples x n_features)
         y_true : target outputs (n_samples)
 
-        batch_size : 
-        optimization_algorithm :
-        regularization_function : 
-        cost_function :
+        batch_size (int) 
+        regularization_function (str)
+        cost_function (str)
 
         """
 
@@ -111,17 +111,21 @@ class MLP:
         batches = [{"X" : X[b * batch_size : (b+1)*batch_size], \
             "y_true" :  y_true[b * batch_size : (b+1)*batch_size]} \
             for b in range(n_batches)]
-        batches.append({"X" : X[(n_batches-1) * batch_size : -1], "y_true" : y_true[(n_batches-1) * batch_size : -1]})
+        batches.append({"X" : X[(n_batches-1) * batch_size : -1], \
+            "y_true" : y_true[(n_batches-1) * batch_size : -1]})
+
+        error_function = GetMetricFunction(error_function_str)
+        #regularization_function = GetRegularizationFunction(regularization_function_str)
         
         for batch in batches:
 
+            y_pred = self.predict(batch["X"])
+            grad_outputs = error_function.derivative(batch["y_true"], y_pred)
+
             for layer in self.layers:
-                layer.get_params["weigths"]
 
-                grad_weigths = layer.backprop(batch["X"], batch["y"])
+                grad_inputs = layer.backprop(grad_outputs)
 
-                new_weigths = layer.weigths - optimization_step * grad_weigths
-                layer.set_params({"weigths" : new_weigths})
 
         
     
