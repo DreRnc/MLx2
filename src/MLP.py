@@ -83,7 +83,7 @@ class MLP:
         if input_size != self.input_size:
             raise Exception("Dimension Error!")
 
-        y_pred = np.empty(n_samples, self.output_size)
+        y_pred = np.empty((n_samples, self.output_size))
         for sample in range(n_samples):
             tmp = X[sample]
             for layer in self.layers:
