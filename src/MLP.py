@@ -83,7 +83,7 @@ class MLP:
             tmp = X[sample]
             for layer in self.layers:
                 layer.input = tmp
-                layer.output = layer.forwardprop(layer_input)
+                layer.output = layer.forwardprop(layer.input)
                 tmp = layer.output
             y_pred[sample] = layer.output
         return y_pred
