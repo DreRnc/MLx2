@@ -108,19 +108,21 @@ class MLP:
 
         n_samples = X.shape[0]
         n_batches = math.ceil(n_samples/self.batch_size)
-        batches = [{"X" : X[b * batch_size : (b+1)*batch_size], \
-            "y_true" :  y_true[b * batch_size : (b+1)*batch_size]} \
-            for b in range(n_batches)]
-        batches.append({"X" : X[(n_batches-1) * batch_size : -1], \
-            "y_true" : y_true[(n_batches-1) * batch_size : -1]})
 
         error_function = GetMetricFunction(error_function_str)
         #regularization_function = GetRegularizationFunction(regularization_function_str)
         
-        for batch in batches:
+        for batch in n_batches:
 
-            y_pred = self.predict(batch["X"])
-            grad_outputs = error_function.derivative(batch["y_true"], y_pred)
+            if batch != n_batches - 1 :
+                X_batch = X[batch * batch_size : (batch+1)*batch_size]
+                y_true_batch = y_true[b * batch_size : (batch+1)*batch_size]
+            else:
+                X_batch = X[batch * batch_size : -1]
+                y_true_batch = y_true[batch * batch_size : -1]
+
+            y_pred_batch = self.predict(X_batch)
+            grad_outputs = error_function.derivative(y_true_batch, y_pred_batch)
 
             for layer in self.layers:
 
