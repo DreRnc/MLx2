@@ -2,6 +2,8 @@ import numpy as np
 from ActivationFunctions import get_activation_instance
 from RegularizationFunctions import get_regularization_instance
 from Optimizers import get_optimizer
+
+
 class Layer:
 
     """

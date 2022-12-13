@@ -9,3 +9,6 @@ class Optimizer:
 
 	def optimize(self, grad_weights, grad_biases):
 		return -self.step * grad_weights, -self.step * grad_biases
+
+def get_optimizer():
+	return Optimizer()
