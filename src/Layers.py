@@ -1,7 +1,7 @@
 import numpy as np
 from ActivationFunctions import get_activation_instance
 from RegularizationFunctions import get_regularization_instance
-
+from Optimizers import get_optimizer
 class Layer:
 
     """
@@ -111,11 +111,11 @@ class FullyConnectedLayer(Layer):
         self._biases = np.zeros(1, self.n_units)
 
         # Optimizer initialization
-        self.optimizer = optimizer
+        self.optimizer = get_optimizer()
         self.optimizer.initialize()
 
         # Regularization function
-        self.regularization_function = regularization
+        self.regularization_function = get_regularization_function("regularization")
 
 
     def get_params(self):
