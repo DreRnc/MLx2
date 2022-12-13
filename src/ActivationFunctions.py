@@ -102,13 +102,13 @@ def get_activation_instance(activation):
         activation: String rapresenting the name of the activation function
     Output: ActivationFunction
     '''
-    if activation in ['sigmoid', 'Sigmoid', 'Sigmoid()','sig']:
+    if activation in ['sigmoid', 'Sigmoid', 'Sigmoid()','sig', 'Sigm', 'sigm']:
         return Sigmoid()
     elif activation in ['tanh', 'Tanh', 'Tanh()','tanh','ta'] :
         return Tanh()
     elif activation in ['identity', 'Identity', 'Identity()','id']:
         return Identity()
-    elif activation in ['relu', 'ReLU', 'ReLU()','r','RELU','Relu','re']:
+    elif activation in ['relu', 'ReLU', 'ReLU()','r','RELU','Relu','re', 'reLU']:
         return ReLU()
     else:
         raise ValueError("Activation function not found")
