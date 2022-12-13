@@ -1,7 +1,7 @@
 import numpy as np
 import math
 
-from Layers import Layer, Fully_Connected_Layer, Dense
+from Layers import Layer, FullyConnectedLayer, Dense
 from MetricFunctions import get_metric_instance
 
 class MLP:
@@ -48,7 +48,7 @@ class MLP:
             if l != n_layers -1:
                 new_layer = Dense(layer_units[l], layer_units[l-1], activation_function_str)
             else:
-                new_layer = Fully_Connected_Layer(layer_units[l], layer_units[l-1])
+                new_layer = FullyConnectedLayer(layer_units[l], layer_units[l-1])
             
             self.layers.append(new_layer)
 
@@ -76,7 +76,7 @@ class MLP:
         for layer in self.layers:
             layer.initialize(inizialization_str, scale, optimizer_str, regularization_function_str)
 
-        error_function = GetMetricFunction(error_function_str)
+        error_function = get_metric_instance(error_function_str)
         
         for batch in range(n_batches):
 
