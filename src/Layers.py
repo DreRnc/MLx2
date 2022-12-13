@@ -217,7 +217,7 @@ class ActivationLayer(Layer):
 
     """
 
-    def __init__(self, n_units, activation = "ReLU"):
+    def __init__(self, activation = "ReLU"):
 
         """
         
@@ -229,7 +229,6 @@ class ActivationLayer(Layer):
 
         """
 
-        self.n_units = n_units
         self.activation = get_activation_instance(activation)
     
     def forwardprop(self, input):
@@ -293,7 +292,7 @@ class Dense(Layer):
         """
 
         self._fully_connected_layer = FullyConnectedLayer(n_units, n_inputs_per_unit)
-        self._activation_layer = ActivationLayer(n_units, activation, activation)
+        self._activation_layer = ActivationLayer(activation)
 
     def initialize(self, optimizer, regularization, weights_initialization = 'scaled', weights_scale = 0.01):
 
