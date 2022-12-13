@@ -55,7 +55,7 @@ class MLP:
             self.layers.append(new_layer)
 
     
-    def fit(self, X, y_true, batch_size, inizialization_str, scale, error_function_str, optimizer_str, regularization_function_str):
+    def fit(self, X, y_true, batch_size, initialization_str, scale, error_function_str, optimizer_str, regularization_function_str):
 
         """
 
@@ -76,7 +76,7 @@ class MLP:
         n_batches = math.ceil(n_samples/batch_size)
 
         for layer in self.layers:
-            layer.initialize(inizialization_str, scale, optimizer_str, regularization_function_str)
+            layer.initialize(initialization_str, scale, optimizer_str, regularization_function_str)
 
         error_function = get_metric_instance(error_function_str)
         
