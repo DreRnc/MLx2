@@ -102,7 +102,7 @@ class MAE(ErrorFunction):
         return (y_pred - y_true) / np.mean(np.abs(y_pred - y_true)) / y_true.shape[0]
 
 
-def GetMetricFunction(metric):
+def get_metric_instance(metric):
     '''
     Returns the metric function indicated in the input if present
     Input: String
