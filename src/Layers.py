@@ -84,7 +84,7 @@ class FullyConnectedLayer(Layer):
         self.n_units = n_units
         self.n_inputs_per_unit = n_inputs_per_unit
 
-    def initialize(self, weights_initialization = 'scaled', weights_scale = 0.01, optimizer, regularization_function):
+    def initialize(self, optimizer, regularization_function, weights_initialization = 'scaled', weights_scale = 0.01):
 
         """
         
@@ -295,7 +295,7 @@ class Dense(Layer):
         self._fully_connected_layer = FullyConnectedLayer(n_units, n_inputs_per_unit)
         self._activation_layer = ActivationLayer(n_units, activation)
 
-     def initialize(self, weights_initialization = 'scaled', weights_scale = 0.01, optimizer, regularization):
+     def initialize(self, optimizer, regularization, weights_initialization = 'scaled', weights_scale = 0.01):
 
         """
         
