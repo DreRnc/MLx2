@@ -177,7 +177,10 @@ class FullyConnectedLayer(Layer):
 
         if np.shape(self._biases)[1] != self.n_units:
             raise Exception("Dimension Error!")
+
         return np.matmul(input, self._weights) + self._biases # broadcasting
+
+
 
     def backprop(self, grad_output):
         

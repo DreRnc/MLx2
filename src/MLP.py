@@ -96,17 +96,9 @@ class MLP:
             X, y_true = np.array_split(training_set, input_size, axis=1)
 
             X_batches = np.array_split(X, [batch_size]*(n_batches-1), axis= 0)
-            
             y_true_batches = np.array_split(y_true, [batch_size]*(n_batches-1), axis= 0)
 
             for batch in range(n_batches):
-
-                # if batch != n_batches - 1 :
-                #     X_batch = X[batch * batch_size : (batch+1)*batch_size]
-                #     y_true_batch = y_true[batch * batch_size : (batch+1)*batch_size]
-                # else:
-                #     X_batch = X[batch * batch_size : -1]
-                #     y_true_batch = y_true[batch * batch_size : -1]
 
                 X_batch = X_batches[batch]
                 y_true_batch = y_true_batches[batch]
@@ -133,11 +125,11 @@ class MLP:
 
         Parameters
         -----------
-        X : input matrix (n_samples x n_features)
+        X : input matrix (n_samples x n_input)
 
         Returns
         -------
-        y_pred : output vector (n_samples)
+        y_pred : output matrix (n_samples x n_output)
 
         """
         

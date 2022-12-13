@@ -1,7 +1,7 @@
 
 class Optimizer:
 
-	def __init__ (self, step = 0.2):
+	def __init__ (self, step = 0.5):
 		self.step = step
 
 	def __call__(self):
