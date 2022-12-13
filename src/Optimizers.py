@@ -1,7 +1,7 @@
 
 class Optimizer:
 
-	__init__ (self, step = 1):
+	def __init__ (self, step = 1):
 		self.step = step
 
 	def initialize(self):
