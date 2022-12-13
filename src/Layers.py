@@ -117,7 +117,7 @@ class FullyConnectedLayer(Layer):
         self.optimizer.initialize()
 
         # Regularization function
-        self.regularization_function = get_regularization_function("regularization")
+        self.regularization_function = get_regularization_instance("regularization")
 
 
     def get_params(self):
