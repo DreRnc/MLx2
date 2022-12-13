@@ -3,8 +3,6 @@ import math
 
 from Layers import Layer, Fully_Connected_Layer, Dense
 from MetricFunctions import GetMetricFunction
-from RegularizationFunctions import GetRegularizationFunction
-from ActivationFunctions import GetActivationFunction
 
 class MLP:
 
@@ -13,7 +11,9 @@ class MLP:
 
     Attributes
     -----------
-    layers: list of layers
+    layers (list)
+    input_size (int)
+    output_size (int)
 
     Methods
     --------
@@ -23,15 +23,17 @@ class MLP:
 
     """
 
-    def __init__(self, n_hidden_layers, hidden_layer_units, input_size, output_size, activation_function="Sigm"):
+    def __init__(self, hidden_layer_units, input_size, output_size, activation_function_str):
 
         """
         Build MLP 
 
         Parameters
         -----------
-        n_layers : number of layers
-        layer_units : list containing the number of units for each layer
+        hidden_layer_units (list) : number of units for each layer
+        input_size (int)
+        output_size (int)
+        activation_function (str)
 
         """
         self.layers = []
@@ -39,15 +41,16 @@ class MLP:
         self.output_size = output_size
 
         layer_units = [input_size, hidden_layer_units, output_size]
+        n_layers = len(layer_units) - 1;
 
-        for l in range(n_hidden_layers):
-            new_layer = Dense(layer_units[l], layer_units[l-1], activation_function)
+        for l in range(n_layers):
+            
+            if l != n_layers -1:
+                new_layer = Dense(layer_units[l], layer_units[l-1], activation_function_str)
+            else:
+                new_layer = Fully_Connected_Layer(layer_units[l], layer_units[l-1])
+            
             self.layers.append(new_layer)
-        
-        output_layer = Fully_Connected_Layer(output_size, input_size)
-
-        self.layers.append(output_layer)
-
 
     
     def fit(self, X, y_true, batch_size, inizialization_str, scale, error_function_str, optimizer_str, regularization_function_str):
@@ -94,7 +97,6 @@ class MLP:
                 grad_inputs = layer.backprop(grad_outputs)
 
 
-        
     def predict(self, X):
 
         """
