@@ -201,7 +201,7 @@ class FullyConnectedLayer(Layer):
         """
 
         grad_input = np.matmul(grad_output, self._weights.T)
-        grad_weights = np.matmul(self._input, grad_output) + self.regularization.derivative(self._weights)
+        grad_weights = np.matmul(self._input.T, grad_output) + self.regularization_function.derivative(self._weights)
         grad_biases = grad_output.sum(axis = 0, keepdims = True) 
 
         weights_update, biases_update = self.optimizer.optimize(grad_weights, grad_biases)
@@ -270,6 +270,7 @@ class ActivationLayer(Layer):
         Gradient of loss function with respect to input of this layer
 
         """
+
 
         return grad_output * self.activation.derivative(self._input)
 
