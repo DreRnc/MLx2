@@ -109,15 +109,18 @@ class FullyConnectedLayer(Layer):
             scale = 1 / self.n_input
         elif weights_initialization == "he":
             scale = 2 / self.n_input
+        else:
+            print("invalid weigths initialization: choose one between 'scaled', 'xavier', 'he' ")
+
         self._weights = np.random.normal(loc = 0.0, scale = scale, size = (self.n_inputs_per_unit, self.n_units))
-        self._biases = np.zeros(1, self.n_units)
+        self._biases = np.zeros((1, self.n_units))
 
         # Optimizer initialization
         self.optimizer = get_optimizer()
         self.optimizer.initialize()
 
         # Regularization function
-        self.regularization_function = get_regularization_instance("regularization")
+        self.regularization_function = get_regularization_instance(regularization_function)
 
 
     def get_params(self):
@@ -173,9 +176,9 @@ class FullyConnectedLayer(Layer):
         """
         self._input = input         # saves values for backprop
 
-        if np.shape(self._biases)[0] != self.n_units:
+        if np.shape(self._biases)[1] != self.n_units:
             raise Exception("Dimension Error!")
-        return np.matmul(self._weights, input) + self._biases # broadcasting
+        return np.matmul(input, self._weights) + self._biases # broadcasting
 
     def backprop(self, grad_output):
         
@@ -312,7 +315,7 @@ class Dense(Layer):
 
         """
 
-        self._fully_connected_layer.initialize(weights_initialization, optimizer, regularization)
+        self._fully_connected_layer.initialize(optimizer, regularization, weights_initialization, weights_scale)
 
     def get_params(self):
 

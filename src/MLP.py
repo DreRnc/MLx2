@@ -48,10 +48,10 @@ class MLP:
 
             if l < n_layers:
                 new_layer = Dense(layer_units[l], layer_units[l-1], activation_function_str)
-                print(new_layer._fully_connected_layer.n_units)
+                
             else:
                 new_layer = FullyConnectedLayer(layer_units[l], layer_units[l-1])
-                print(new_layer.n_units)
+                
             
             self.layers.append(new_layer)
 
@@ -72,12 +72,11 @@ class MLP:
         cost_function (str)
 
         """
-
         n_samples = X.shape[0]
         n_batches = math.ceil(n_samples/batch_size)
 
         for layer in self.layers:
-            layer.initialize(initialization_str, scale, optimizer_str, regularization_function_str)
+            layer.initialize(optimizer_str, regularization_function_str, initialization_str, scale)
 
         error_function = get_metric_instance(error_function_str)
         
@@ -89,6 +88,8 @@ class MLP:
             else:
                 X_batch = X[batch * batch_size : -1]
                 y_true_batch = y_true[batch * batch_size : -1]
+
+            print(X_batch)
 
             y_pred_batch = self.predict(X_batch)
             print(error_function_str + " = " + str(error_function(y_true_batch, y_pred_batch)))
