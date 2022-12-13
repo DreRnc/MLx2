@@ -95,7 +95,7 @@ class ReLU(ActivationFunction):
         return (x > 0).astype(int)
 
 
-def GetActivationFunction(activation):
+def get_activation_instance(activation):
     '''
     Returns the activation function indicated in the input if present
     Input: String

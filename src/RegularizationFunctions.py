@@ -118,7 +118,7 @@ class ElasticReg(RegularizationFunction):
     def derivative(self, w):
         return self.alpha_l1 * np.sign(w) + 2 * self.alpha_l2 * w
 
-def GetRegularizationFunction(reg_type, alpha=0.1,beta=0.1):
+def get_regularization_instance(reg_type, alpha=0.1,beta=0.1):
     '''
     Returns the activation function indicated in the input if present
 

@@ -1,8 +1,8 @@
 import numpy as np
 from ActivationFunctions import ActivationFunction
-from ActivationFunctions import GetActivationFunction
-
-
+from ActivationFunctions import get_activation_instance
+from RegulationFunctions import RegularizationFunction
+from RegulationFunctions import get_regularization_instance
 
 class Layer:
 
@@ -198,7 +198,7 @@ class FullyConnectedLayer(Layer):
         """
 
         grad_input = np.matmul(grad_output, self._weights.T)
-        grad_weights = np.matmul(self._input, grad_output) + self.compute_regularization(self.regularization)
+        grad_weights = np.matmul(self._input, grad_output) + self.regularization.derivative(self._weights)
         grad_biases = grad_output.sum(axis = 0, keepdims = True) 
 
         weights_update, biases_update = self.optimizer.optimize(grad_weights, grad_biases)
