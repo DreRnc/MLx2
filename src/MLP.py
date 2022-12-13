@@ -46,11 +46,12 @@ class MLP:
 
         for l in range(n_layers):
 
-            if l != n_layers - 1:
+            if l != n_layers:
                 new_layer = Dense(layer_units[l], layer_units[l-1], activation_function_str)
                 print(new_layer._fully_connected_layer.n_units)
             else:
                 new_layer = FullyConnectedLayer(layer_units[l], layer_units[l-1])
+                print(new_layer.n_units)
             
             self.layers.append(new_layer)
 
