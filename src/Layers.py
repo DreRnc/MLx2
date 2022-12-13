@@ -105,9 +105,9 @@ class FullyConnectedLayer(Layer):
         # Weight initialization
         if weights_initialization == "scaled":
             scale = weights_scale
-        elif self.weights_initialization == "xavier":
+        elif weights_initialization == "xavier":
             scale = 1 / self.n_input
-        elif self.weights_initialization == "he":
+        elif weights_initialization == "he":
             scale = 2 / self.n_input
         self._weights = np.random.normal(loc = 0.0, scale = scale, size = (self.n_inputs_per_unit, self.n_units))
         self._biases = np.zeros(1, self.n_units)
