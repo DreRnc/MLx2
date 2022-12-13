@@ -42,11 +42,11 @@ class MLP:
 
         layer_units = [input_size] + hidden_layer_units + [output_size]
         
-        n_layers = len(layer_units) - 1
+        n_layers = len(layer_units) - 1 
 
-        for l in range(n_layers):
+        for l in range(1,n_layers +1):
 
-            if l != n_layers:
+            if l < n_layers:
                 new_layer = Dense(layer_units[l], layer_units[l-1], activation_function_str)
                 print(new_layer._fully_connected_layer.n_units)
             else:
