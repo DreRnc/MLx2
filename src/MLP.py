@@ -2,7 +2,7 @@ import numpy as np
 import math
 
 from Layers import Layer, Fully_Connected_Layer, Dense
-from MetricFunctions import GetMetricFunction
+from MetricFunctions import get_metric_instance
 
 class MLP:
 
@@ -44,7 +44,7 @@ class MLP:
         n_layers = len(layer_units) - 1;
 
         for l in range(n_layers):
-            
+
             if l != n_layers -1:
                 new_layer = Dense(layer_units[l], layer_units[l-1], activation_function_str)
             else:
