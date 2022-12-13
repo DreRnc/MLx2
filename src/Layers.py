@@ -1,6 +1,6 @@
 import numpy as np
 from ActivationFunctions import get_activation_instance
-from RegulationFunctions import get_regularization_instance
+from RegularizationFunctions import get_regularization_instance
 
 class Layer:
 
