@@ -1,7 +1,5 @@
 import numpy as np
-from ActivationFunctions import ActivationFunction
 from ActivationFunctions import get_activation_instance
-from RegulationFunctions import RegularizationFunction
 from RegulationFunctions import get_regularization_instance
 
 class Layer:
