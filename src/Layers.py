@@ -1,7 +1,7 @@
 import numpy as np
 from ActivationFunctions import get_activation_instance
 from RegularizationFunctions import get_regularization_instance
-from Optimizers import get_optimizer_instance
+from Optimizers import HeavyBallGradient
 
 
 class Layer:
@@ -86,7 +86,7 @@ class FullyConnectedLayer(Layer):
         self.n_units = n_units
         self.n_inputs_per_unit = n_inputs_per_unit
 
-    def initialize(self, optimizer, regularization_function, weights_initialization = 'scaled', weights_scale = 0.01):
+    def initialize(self, regularization_function, alpha_l1, alpha_l2, weights_initialization, weights_scale, step, momentum):
 
         """
         
@@ -115,11 +115,15 @@ class FullyConnectedLayer(Layer):
         self._weights = np.random.normal(loc = 0.0, scale = scale, size = (self.n_inputs_per_unit, self.n_units))
         self._biases = np.zeros((1, self.n_units))
 
+        #save last weigths and biases update for HBG
+        self._last_weights_update = 0
+        self._last_biases_update = 0
+
         # Optimizer initialization
-        self.optimizer = get_optimizer_instance(optimizer)
+        self.optimizer = HeavyBallGradient(step, momentum)
 
         # Regularization function
-        self.regularization_function = get_regularization_instance(regularization_function)
+        self.regularization_function = get_regularization_instance(regularization_function, alpha_l1, alpha_l2)
 
 
     def get_params(self):
@@ -175,6 +179,17 @@ class FullyConnectedLayer(Layer):
         """
         self._input = input         # saves values for backprop
 
+        # print("input")
+        # print(self._input)
+        # print("weigths")
+        # print(self._weights)
+        # print("input * weigths")
+        # print(np.matmul(input, self._weights))
+        # print("biases")
+        # print(self._biases)
+        # print("z")
+        # print(np.matmul(input, self._weights) + self._biases)
+
         if np.shape(self._biases)[1] != self.n_units:
             raise Exception("Dimension Error!")
 
@@ -206,10 +221,13 @@ class FullyConnectedLayer(Layer):
         grad_weights = np.matmul(self._input.T, grad_output) + self.regularization_function.derivative(self._weights)
         grad_biases = grad_output.sum(axis = 0, keepdims = True) 
 
-        weights_update, biases_update = self.optimizer(grad_weights, grad_biases)
+        weights_update, biases_update = self.optimizer(grad_weights, grad_biases, self._last_weights_update, self._last_biases_update)
 
         self._biases += biases_update
         self._weights += weights_update
+
+        self._last_weights_update = weights_update
+        self._last_biases_update = biases_update
 
         return grad_input
 
@@ -255,6 +273,9 @@ class ActivationLayer(Layer):
         """
 
         self._input = input         # saves values for backprop
+
+        # print(self.activation(input))
+
         return self.activation(input)
 
     def backprop(self, grad_output):
@@ -302,7 +323,7 @@ class Dense(Layer):
         self._fully_connected_layer = FullyConnectedLayer(n_units, n_inputs_per_unit)
         self._activation_layer = ActivationLayer(activation)
 
-    def initialize(self, optimizer, regularization, weights_initialization = 'scaled', weights_scale = 0.01):
+    def initialize(self, regularization, alpha_l1, alpha_l2, weights_initialization, weights_scale, step, momentum):
 
         """
         
@@ -318,7 +339,7 @@ class Dense(Layer):
 
         """
 
-        self._fully_connected_layer.initialize(optimizer, regularization, weights_initialization, weights_scale)
+        self._fully_connected_layer.initialize(regularization, alpha_l1, alpha_l2, weights_initialization, weights_scale, step, momentum)
 
     def get_params(self):
 

@@ -23,10 +23,10 @@ class MLP:
 
     """
 
-    def __init__(self, hidden_layer_units, input_size, output_size, activation_function_str):
+    def __init__(self, hidden_layer_units, input_size, output_size, activation_function):
 
         """
-        Build MLP 
+        Build MLP for regression (the last layer is fully connected)
 
         Parameters
         -----------
@@ -44,11 +44,10 @@ class MLP:
         
         n_layers = len(layer_units) - 1 
 
-        for l in range(1,n_layers +1):
+        for l in range(1, n_layers +1):
 
             if l < n_layers:
-                new_layer = Dense(layer_units[l], layer_units[l-1], activation_function_str)
-                
+                new_layer = Dense(layer_units[l], layer_units[l-1], activation_function)
             else:
                 new_layer = FullyConnectedLayer(layer_units[l], layer_units[l-1])
                 
@@ -56,7 +55,8 @@ class MLP:
             self.layers.append(new_layer)
 
     
-    def fit(self, X, y_true, n_epochs, batch_size, initialization_str, scale, error_function_str, optimizer_str, regularization_function_str):
+    def fit(self, X, y_true, n_epochs, batch_size, error = "MSE", regularization = "no", alpha_l1 = 0, alpha_l2 = 0, \
+        weights_initialization = "scaled", weights_scale = 0.1, step = 0.06, momentum = 0.03):
 
         """
 
@@ -64,12 +64,20 @@ class MLP:
 
         Parameters
         -----------
-        X : input matrix (n_samples x n_features)
-        y_true : target outputs (n_samples)
+        X (n_samples x n_inputs) : 
+        y_true (n_samples x n_output) : 
 
-        batch_size (int) 
-        regularization_function (str)
-        cost_function (str)
+        n_epochs (int) :
+        batch_size (int) :
+        error (str) :
+        regularization (str) :
+        alpha_l1 (float) :
+        alpha_l2 (float) : 
+        initialization (str) : 
+        weights_scale (float): 
+        step (float) : 
+        momentum (float) : 
+
 
         """
 
@@ -85,16 +93,15 @@ class MLP:
         n_batches = math.ceil(n_samples/batch_size)
 
         for layer in self.layers:
-            layer.initialize(optimizer_str, regularization_function_str, initialization_str, scale)
+            layer.initialize(regularization, alpha_l1, alpha_l2, weights_initialization, weights_scale, step, momentum)
 
-        error_function = get_metric_instance(error_function_str)
+        error_function = get_metric_instance(error)
         
         for epoch in range(n_epochs):
 
             np.random.shuffle(training_set)
-
             X, y_true = np.array_split(training_set, input_size, axis=1)
-
+            
             X_batches = np.array_split(X, [batch_size]*(n_batches-1), axis= 0)
             y_true_batches = np.array_split(y_true, [batch_size]*(n_batches-1), axis= 0)
 
@@ -113,8 +120,12 @@ class MLP:
                     grad_outputs = grad_inputs
 
             y_pred = self.predict(X)
-            print("Epoch " + str(epoch) + ": " +error_function_str + " = " + str(error_function(y_true, y_pred)))
 
+            print("Epoch " + str(epoch) + ": " + error + " = " + str(error_function(y_true, y_pred)))
+
+            # if error_function(y_true, y_pred) < 0.01:
+            #     break
+            
 
 
 
