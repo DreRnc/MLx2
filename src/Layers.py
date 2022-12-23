@@ -101,7 +101,7 @@ class FullyConnectedLayer(Layer):
         regularization_function (RegularizationFunction): regularization function for the layer
 
         """
-
+        scale = weights_scale
         # Weight initialization
         if weights_initialization == "scaled":
             scale = weights_scale
