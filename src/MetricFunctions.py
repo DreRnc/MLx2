@@ -75,7 +75,7 @@ class MSE(ErrorFunction):
     def derivative(self, y_true, y_pred):
         if y_true.shape != y_pred.shape:
             raise ValueError("inputs must have the same shape")
-        return 2 * (y_pred - y_true) / y_true.shape[0]
+        return 2 * (y_pred - y_true)/(y_true.shape[0]*y_true.shape[1])
 
 class MAE(ErrorFunction):
     '''
@@ -99,8 +99,7 @@ class MAE(ErrorFunction):
     def derivative(self, y_true, y_pred):
         if y_true.shape != y_pred.shape:
             raise ValueError("inputs must have the same shape")
-        return (y_pred - y_true) / np.mean(np.abs(y_pred - y_true)) / y_true.shape[0]
-
+        return sign(y_pred-y_true)/(y_true.shape[0]*y_true.shape[1])
 
 def get_metric_instance(metric):
     '''
@@ -110,7 +109,7 @@ def get_metric_instance(metric):
     Output: MetricFunction
     '''
     if metric in  ["MSE", "mean_squared_error",'mse','mean squared error']:
-        return MSE()
+        return MSE()	
     elif metric in ["MAE", "mean_absolute_error",'mae','mean absolute error','mee','MEE','mean expected error','Mean Expected Error']:
         return MAE()
     elif metric in ["Accuracy", "accuracy", "acc", "ACC", "ACCURACY",'a']:
