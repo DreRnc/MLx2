@@ -1,14 +1,23 @@
 
 class Optimizer:
 
-	def __init__ (self, step = 1):
+	def __init__ (self, step = 0.5):
 		self.step = step
 
-	def initialize(self):
-		pass
+	def __call__(self):
+		raise NotImplementedError
 
-	def optimize(self, grad_weights, grad_biases):
-		return -self.step * grad_weights, -self.step * grad_biases
 
-def get_optimizer():
-	return Optimizer()
+class gradient(Optimizer):
+
+	def __call__(self, grad_weigths, grad_biases):
+
+		return -self.step * grad_weigths, -self.step * grad_biases
+
+
+def get_optimizer_instance(optimizer):
+    
+    if optimizer in  ["gradient", "gradient descent", "GD"]:
+        return gradient()
+    else:
+        raise ValueError("Metric function not found")

@@ -48,15 +48,15 @@ class MLP:
 
             if l < n_layers:
                 new_layer = Dense(layer_units[l], layer_units[l-1], activation_function_str)
-                print(new_layer._fully_connected_layer.n_units)
+                
             else:
                 new_layer = FullyConnectedLayer(layer_units[l], layer_units[l-1])
-                print(new_layer.n_units)
+                
             
             self.layers.append(new_layer)
 
     
-    def fit(self, X, y_true, batch_size, initialization_str, scale, error_function_str, optimizer_str, regularization_function_str):
+    def fit(self, X, y_true, n_epochs, batch_size, initialization_str, scale, error_function_str, optimizer_str, regularization_function_str):
 
         """
 
@@ -73,31 +73,49 @@ class MLP:
 
         """
 
+        input_size = X.shape[1]
+        output_size = y_true.shape[1]
         n_samples = X.shape[0]
+
+        if input_size != self.input_size or output_size != self.output_size:
+            raise Exception("Dimension Error!")
+
+        training_set = np.concatenate((X, y_true), axis = 1)
+
         n_batches = math.ceil(n_samples/batch_size)
 
         for layer in self.layers:
-            layer.initialize(initialization_str, scale, optimizer_str, regularization_function_str)
+            layer.initialize(optimizer_str, regularization_function_str, initialization_str, scale)
 
         error_function = get_metric_instance(error_function_str)
         
-        for batch in range(n_batches):
+        for epoch in range(n_epochs):
 
-            if batch != n_batches - 1 :
-                X_batch = X[batch * batch_size : (batch+1)*batch_size]
-                y_true_batch = y_true[batch * batch_size : (batch+1)*batch_size]
-            else:
-                X_batch = X[batch * batch_size : -1]
-                y_true_batch = y_true[batch * batch_size : -1]
+            np.random.shuffle(training_set)
 
-            y_pred_batch = self.predict(X_batch)
-            print(error_function_str + " = " + str(error_function(y_true_batch, y_pred_batch)))
-            
-            grad_outputs = error_function.derivative(y_true_batch, y_pred_batch)
-            
-            for layer in self.layers:
+            X, y_true = np.array_split(training_set, input_size, axis=1)
 
-                grad_inputs = layer.backprop(grad_outputs)
+            X_batches = np.array_split(X, [batch_size]*(n_batches-1), axis= 0)
+            y_true_batches = np.array_split(y_true, [batch_size]*(n_batches-1), axis= 0)
+
+            for batch in range(n_batches):
+
+                X_batch = X_batches[batch]
+                y_true_batch = y_true_batches[batch]
+
+                y_pred_batch = self.predict(X_batch)
+                
+                grad_outputs = error_function.derivative(y_true_batch, y_pred_batch)
+                
+                for layer in reversed(self.layers):
+
+                    grad_inputs = layer.backprop(grad_outputs)
+                    grad_outputs = grad_inputs
+
+            y_pred = self.predict(X)
+            print("Epoch " + str(epoch) + ": " +error_function_str + " = " + str(error_function(y_true, y_pred)))
+
+
 
 
     def predict(self, X):
@@ -107,11 +125,11 @@ class MLP:
 
         Parameters
         -----------
-        X : input matrix (n_samples x n_features)
+        X : input matrix (n_samples x n_input)
 
         Returns
         -------
-        y_pred : output vector (n_samples)
+        y_pred : output matrix (n_samples x n_output)
 
         """
         
@@ -120,12 +138,14 @@ class MLP:
             raise Exception("Dimension Error!")
 
         y_pred = np.empty((n_samples, self.output_size))
-        for sample in range(n_samples):
-            tmp = X[sample]
-            for layer in self.layers:
-                layer.input = tmp
-                layer.output = layer.forwardprop(layer.input)
-                tmp = layer.output
-            y_pred[sample] = layer.output
+        
+        tmp = X
+        for layer in self.layers:
+            layer.input = tmp
+            layer.output = layer.forwardprop(layer.input)
+            tmp = layer.output
+
+        y_pred = layer.output
+
         return y_pred
 

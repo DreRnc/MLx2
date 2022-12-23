@@ -1,7 +1,7 @@
 import numpy as np
 from ActivationFunctions import get_activation_instance
 from RegularizationFunctions import get_regularization_instance
-from Optimizers import get_optimizer
+from Optimizers import get_optimizer_instance
 
 
 class Layer:
@@ -109,15 +109,17 @@ class FullyConnectedLayer(Layer):
             scale = 1 / self.n_input
         elif weights_initialization == "he":
             scale = 2 / self.n_input
+        else:
+            print("invalid weigths initialization: choose one between 'scaled', 'xavier', 'he' ")
+
         self._weights = np.random.normal(loc = 0.0, scale = scale, size = (self.n_inputs_per_unit, self.n_units))
-        self._biases = np.zeros(1, self.n_units)
+        self._biases = np.zeros((1, self.n_units))
 
         # Optimizer initialization
-        self.optimizer = get_optimizer()
-        self.optimizer.initialize()
+        self.optimizer = get_optimizer_instance(optimizer)
 
         # Regularization function
-        self.regularization_function = get_regularization_instance("regularization")
+        self.regularization_function = get_regularization_instance(regularization_function)
 
 
     def get_params(self):
@@ -173,9 +175,12 @@ class FullyConnectedLayer(Layer):
         """
         self._input = input         # saves values for backprop
 
-        if np.shape(self._biases)[0] != self.n_units:
+        if np.shape(self._biases)[1] != self.n_units:
             raise Exception("Dimension Error!")
-        return np.matmul(self._weights, input) + self._biases # broadcasting
+
+        return np.matmul(input, self._weights) + self._biases # broadcasting
+
+
 
     def backprop(self, grad_output):
         
@@ -198,10 +203,10 @@ class FullyConnectedLayer(Layer):
         """
 
         grad_input = np.matmul(grad_output, self._weights.T)
-        grad_weights = np.matmul(self._input, grad_output) + self.regularization.derivative(self._weights)
+        grad_weights = np.matmul(self._input.T, grad_output) + self.regularization_function.derivative(self._weights)
         grad_biases = grad_output.sum(axis = 0, keepdims = True) 
 
-        weights_update, biases_update = self.optimizer.optimize(grad_weights, grad_biases)
+        weights_update, biases_update = self.optimizer(grad_weights, grad_biases)
 
         self._biases += biases_update
         self._weights += weights_update
@@ -268,6 +273,7 @@ class ActivationLayer(Layer):
 
         """
 
+
         return grad_output * self.activation.derivative(self._input)
 
 
@@ -312,7 +318,7 @@ class Dense(Layer):
 
         """
 
-        self._fully_connected_layer.initialize(weights_initialization, optimizer, regularization)
+        self._fully_connected_layer.initialize(optimizer, regularization, weights_initialization, weights_scale)
 
     def get_params(self):
 
