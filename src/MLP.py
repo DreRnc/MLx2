@@ -1,8 +1,8 @@
 import numpy as np
 import math
 
-from Layers import Layer, FullyConnectedLayer, Dense
-from MetricFunctions import get_metric_instance
+from src.Layers import Layer, FullyConnectedLayer, Dense
+from src.MetricFunctions import get_metric_instance
 
 class MLP:
 
@@ -96,13 +96,17 @@ class MLP:
             layer.initialize(regularization, alpha_l1, alpha_l2, weights_initialization, weights_scale, step, momentum)
 
         error_function = get_metric_instance(error)
-        
+        learning_curve = np.ndarray((n_epochs,1))
+
         for epoch in range(n_epochs):
 
             np.random.shuffle(training_set)
-            X, y_true = np.array_split(training_set, input_size, axis=1)
             
-            X_batches = np.array_split(X, [batch_size]*(n_batches-1), axis= 0)
+            TR = np.split(training_set, [input_size], axis = 1)
+            X = TR[0]
+            y_true = TR[1]
+            
+            X_batches = np.array_split(X, [batch_size]*(n_batches-1), axis = 0)
             y_true_batches = np.array_split(y_true, [batch_size]*(n_batches-1), axis= 0)
 
             for batch in range(n_batches):
@@ -121,10 +125,11 @@ class MLP:
 
             y_pred = self.predict(X)
 
-            print("Epoch " + str(epoch) + ": " + error + " = " + str(error_function(y_true, y_pred)))
+            learning_curve[epoch] = error_function(y_true, y_pred)
 
-            # if error_function(y_true, y_pred) < 0.01:
-            #     break
+            # print("Epoch " + str(epoch) + ": " + error + " = " + str(error_function(y_true, y_pred)))
+
+        return learning_curve
             
 
 

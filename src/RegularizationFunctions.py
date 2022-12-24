@@ -89,6 +89,6 @@ def get_regularization_instance(reg_type, alpha_l1, alpha_l2):
     elif reg_type in ['Elastic', 'ElasticNet', 'elastic', 'elasticnet']:
         return ElasticReg(alpha_l1, alpha_l2)
     elif reg_type in ['None', 'No', 'no', 'none']:
-        return NoReg()
+        return NoReg(alpha_l1, alpha_l2)
     else:
         raise ValueError('Regularization function not recognized')
