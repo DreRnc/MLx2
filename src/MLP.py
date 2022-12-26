@@ -1,8 +1,10 @@
 import numpy as np
 import math
+from sklearn.model_selection import train_test_split
 
 from src.Layers import Layer, FullyConnectedLayer, Dense
 from src.MetricFunctions import get_metric_instance
+from src.EarlyStopping import EarlyStopping
 
 class MLP:
 
@@ -55,8 +57,9 @@ class MLP:
             self.layers.append(new_layer)
 
     
-    def fit(self, X, y_true, n_epochs, batch_size, error = "MSE", regularization = "no", alpha_l1 = 0, alpha_l2 = 0, \
-        weights_initialization = "scaled", weights_scale = 0.1, step = 0.1, momentum = 0, Nesterov = False):
+    def fit(self, X, y_true, n_epochs, batch_size, X_test = None, y_test = None, error = "MSE", regularization = "no", \
+        alpha_l1 = 0, alpha_l2 = 0, weights_initialization = "scaled", weights_scale = 0.1, step = 0.1, momentum = 0, Nesterov = False, \
+        early_stopping = None, validation_split_ratio = 0.1, verbose = False):
 
         """
 
@@ -77,6 +80,7 @@ class MLP:
         weights_scale (float): 
         step (float) : 
         momentum (float) : 
+        early_stopping (bool) :
 
 
         """
@@ -98,6 +102,12 @@ class MLP:
         error_function = get_metric_instance(error)
         learning_curve = np.ndarray((n_epochs,1))
 
+        # Initializes EarlyStopping
+        if early_stopping:
+            early_stopping.initialize()
+            X, X_test, y_true, y_test = train_test_split(X, y_true, test_size = validation_split_ratio, shuffle = True) # manca random state, cos'è?
+        
+        # Training
         for epoch in range(n_epochs):
 
             np.random.shuffle(training_set)
@@ -122,6 +132,23 @@ class MLP:
 
                     grad_inputs = layer.backprop(grad_outputs)
                     grad_outputs = grad_inputs
+            
+            if early_stopping:
+
+                if X_test is not None:
+                    y_pred_test = self.predict(X_test)
+                    test_loss = error_function(y_test, y_pred_test)
+                
+                params = [layer.get_params() for layer in self.layers]
+                stop = early_stopping.on_epoch_end(test_loss, y_test, y_pred_test, params)
+
+                if stop:
+                    if verbose:
+                        print("\nEarly stopped training")
+                    best_params = early_stopping._best_params
+                    for layer, layer_best_params in zip(self.layers, best_params):
+                        layer.set_params(layer_best_params)
+                    break
 
             y_pred = self.predict(X)
 

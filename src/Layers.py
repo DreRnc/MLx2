@@ -184,17 +184,6 @@ class FullyConnectedLayer(Layer):
         """
         self._input = input         # saves values for backprop
 
-        # print("input")
-        # print(self._input)
-        # print("weigths")
-        # print(self._weights)
-        # print("input * weigths")
-        # print(np.matmul(input, self._weights))
-        # print("biases")
-        # print(self._biases)
-        # print("z")
-        # print(np.matmul(input, self._weights) + self._biases)
-
         if np.shape(self._biases)[1] != self.n_units:
             raise Exception("Dimension Error!")
 
