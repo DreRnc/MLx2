@@ -4,7 +4,7 @@ from MetricFunctions import MetricFunction, get_metric_instance
 
 class EarlyStopping():
 
-    def __init__ (self, metric = "loss", patience, tolerance, mode = "min"):
+    def __init__ (self,  patience, tolerance, metric = "loss", mode = "min"):
 
         """
         Initialize EarlyStopping Object

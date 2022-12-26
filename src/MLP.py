@@ -81,7 +81,7 @@ class MLP:
         step (float) : 
         momentum (float) : 
         early_stopping (bool) :
-
+        validation_split_ratio (float) :
 
         """
 
