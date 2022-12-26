@@ -1,5 +1,5 @@
 import numpy as np
-from MetricFunctions import MetricFunction, get_metric_instance
+from src.MetricFunctions import MetricFunction, get_metric_instance
 
 
 class EarlyStopping():

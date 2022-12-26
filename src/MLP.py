@@ -25,7 +25,7 @@ class MLP:
 
     """
 
-    def __init__(self, hidden_layer_units, input_size, output_size, activation_function):
+    def __init__(self, hidden_layer_units, input_size, output_size, activation_function = 'sigm', task = 'regression'):
 
         """
         Build MLP for regression (the last layer is fully connected)
@@ -36,6 +36,7 @@ class MLP:
         input_size (int)
         output_size (int)
         activation_function (str)
+        task (str)
 
         """
         self.layers = []
@@ -48,7 +49,7 @@ class MLP:
 
         for l in range(1, n_layers +1):
 
-            if l < n_layers:
+            if l < n_layers or task == 'classification':
                 new_layer = Dense(layer_units[l], layer_units[l-1], activation_function)
             else:
                 new_layer = FullyConnectedLayer(layer_units[l], layer_units[l-1])
