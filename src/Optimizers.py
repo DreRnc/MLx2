@@ -1,5 +1,3 @@
-
-
 class HeavyBallGradient():
 
 	def __init__(self, step, momentum, Nesterov):
