@@ -56,7 +56,7 @@ class MLP:
 
     
     def fit(self, X, y_true, n_epochs, batch_size, error = "MSE", regularization = "no", alpha_l1 = 0, alpha_l2 = 0, \
-        weights_initialization = "scaled", weights_scale = 0.1, step = 0.06, momentum = 0.03):
+        weights_initialization = "scaled", weights_scale = 0.1, step = 0.1, momentum = 0, Nesterov = False):
 
         """
 
@@ -93,7 +93,7 @@ class MLP:
         n_batches = math.ceil(n_samples/batch_size)
 
         for layer in self.layers:
-            layer.initialize(regularization, alpha_l1, alpha_l2, weights_initialization, weights_scale, step, momentum)
+            layer.initialize(weights_initialization, weights_scale, regularization, alpha_l1, alpha_l2, step, momentum, Nesterov)
 
         error_function = get_metric_instance(error)
         learning_curve = np.ndarray((n_epochs,1))

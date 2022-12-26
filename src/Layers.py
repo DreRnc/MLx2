@@ -86,7 +86,7 @@ class FullyConnectedLayer(Layer):
         self.n_units = n_units
         self.n_inputs_per_unit = n_inputs_per_unit
 
-    def initialize(self, regularization_function, alpha_l1, alpha_l2, weights_initialization, weights_scale, step, momentum):
+    def initialize(self, weights_initialization, weights_scale, regularization_function, alpha_l1, alpha_l2, step, momentum, Nesterov):
 
         """
         
@@ -95,10 +95,15 @@ class FullyConnectedLayer(Layer):
         
         Parameters
         ----------
+        
         weights_initialization (str): type of initialization for weights
         weights_scale (int): scale for initialization of weights
-        optimizer (Optimizer): type of optimizer for layer
         regularization_function (RegularizationFunction): regularization function for the layer
+        alpha_l1
+        alpha_l2
+        step
+        momentum
+        Nesterov
 
         """
         scale = weights_scale
@@ -120,7 +125,7 @@ class FullyConnectedLayer(Layer):
         self._last_biases_update = 0
 
         # Optimizer initialization
-        self.optimizer = HeavyBallGradient(step, momentum)
+        self.optimizer = HeavyBallGradient(step, momentum, Nesterov)
 
         # Regularization function
         self.regularization_function = get_regularization_instance(regularization_function, alpha_l1, alpha_l2)
@@ -217,8 +222,15 @@ class FullyConnectedLayer(Layer):
 
         """
 
-        grad_input = np.matmul(grad_output, self._weights.T)
-        grad_weights = np.matmul(self._input.T, grad_output) + self.regularization_function.derivative(self._weights)
+        weights = self._weights
+        biases = self._biases
+
+        if self.optimizer.Nesterov:
+            weights = weights + self.optimizer.momentum * self._last_weights_update
+            biases = biases + self.optimizer.momentum * self._last_biases_update
+
+        grad_input = np.matmul(grad_output, weights.T)
+        grad_weights = np.matmul(self._input.T, grad_output) + self.regularization_function.derivative(weights)
         grad_biases = grad_output.sum(axis = 0, keepdims = True) 
 
         weights_update, biases_update = self.optimizer(grad_weights, grad_biases, self._last_weights_update, self._last_biases_update)
@@ -323,7 +335,7 @@ class Dense(Layer):
         self._fully_connected_layer = FullyConnectedLayer(n_units, n_inputs_per_unit)
         self._activation_layer = ActivationLayer(activation)
 
-    def initialize(self, regularization, alpha_l1, alpha_l2, weights_initialization, weights_scale, step, momentum):
+    def initialize(self, weights_initialization, weights_scale, regularization, alpha_l1, alpha_l2, step, momentum, Nesterov):
 
         """
         
@@ -334,12 +346,16 @@ class Dense(Layer):
         ----------
         weights_initialization (str): type of initialization for weights
         weights_scale (int): scale for initialization of weights
-        optimizer (Optimizer): type of optimizer for layer
         regularization_function (RegularizationFunction): regularization function for the layer
+        alpha_l1
+        alpha_l2
+        step
+        momentum
+        Nesterov
 
         """
 
-        self._fully_connected_layer.initialize(regularization, alpha_l1, alpha_l2, weights_initialization, weights_scale, step, momentum)
+        self._fully_connected_layer.initialize(weights_initialization, weights_scale, regularization, alpha_l1, alpha_l2, step, momentum, Nesterov)
 
     def get_params(self):
 
