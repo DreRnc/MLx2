@@ -9,19 +9,19 @@ class GridSearch():
 
     Attributes
     ----------
-    model (Model): The model to be optimized
+    model (Model): The model to be optimized, after the fit method is called it contains the best model found
     parameters_grid (Dictionary): The combinations of parameters to be tested
-    loss_function (MetricFunction): The loss function to be used
+    loss_function (MetricFunction): The loss function to be used in the optimization
     n_results (Int): The number of results to be returned
-    best_parameters (List): The best parameters found
-    best_score (Float): The best score found
-    best_model (Model): The best model found
+    best_parameters (List): The parameters of the best performing model
+    best_score (Float): The best score achived
+    best_model (Model): The best model found trained on the whole dataset provided
 
 
     Methods
     -------
     fit(X, y, parameters_grid, n_folds = 0, stratified = False, test_size = 0.2, verbose = True):
-        Performs the grid search
+        Performs the grid search and saves the best parameters and the best model
     get_best_parameters(n_results = 1, all = False): 
         Returns the best n parameters found with the scores
     '''
@@ -34,8 +34,7 @@ class GridSearch():
         Parameters
         ----------
         model (Model): The model to be optimized
-        loss_function (MetricFunction): The loss function to be used
-        n_results (Int): The number of results to be returned
+        loss_function (MetricFunction): The loss function to be used in the optimization
         '''
 
         self.model = model
@@ -58,6 +57,7 @@ class GridSearch():
         parameters_grid (Dictionary): The values of parameters to be tested
         n_folds (Int > 1): The number of folds to be used in the cross validation
         stratified (Bool): If True the folds are stratified
+        test_size (Float): The size of the test set if n_folds < 2
         verbose (Bool): If True prints the results of each combination of parameters
         '''
         self.data = X
