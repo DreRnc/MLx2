@@ -63,8 +63,8 @@ class MSE(ErrorFunction):
                 y_pred: np.array of the predicted values
             Output: Float
         derivative(self,y_true, y_pred): Returns the derivative of the mean squared error
-            Input: 2 np.arrays of the same shape
-            Output: np.array
+            Input: 2 np.arrays (n_observations, n_outputs) of the same shape
+            Output: np.array (n_observations, n_outputs)
 
     '''
     def __call__(self, y_true, y_pred):
@@ -75,7 +75,9 @@ class MSE(ErrorFunction):
     def derivative(self, y_true, y_pred):
         if y_true.shape != y_pred.shape:
             raise ValueError("inputs must have the same shape")
-        return 2 * (y_pred - y_true)/(y_true.shape[0]*y_true.shape[1])
+        #we are deviding by the number of samples since we are using the mean of th gradients in a batch and not the sum
+        # we are also not multiplying by 2 to simplify the backpropagation
+        return (y_pred - y_true) / y_true.shape[0]
 
 class MAE(ErrorFunction):
     '''
@@ -99,7 +101,7 @@ class MAE(ErrorFunction):
     def derivative(self, y_true, y_pred):
         if y_true.shape != y_pred.shape:
             raise ValueError("inputs must have the same shape")
-        return sign(y_pred-y_true)/(y_true.shape[0]*y_true.shape[1])
+        return np.sign(y_pred-y_true)/(y_true.shape[0]*y_true.shape[1])
 
 def get_metric_instance(metric):
     '''
