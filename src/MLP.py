@@ -85,7 +85,8 @@ class MLP:
         validation_split_ratio (float) :
 
         """
-
+        n_epochs = int(n_epochs)
+        batch_size = int(batch_size)
         input_size = X.shape[1]
         output_size = y_true.shape[1]
         n_samples = X.shape[0]
