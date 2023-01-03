@@ -106,7 +106,7 @@ class MLP:
         # Initializes EarlyStopping
         if early_stopping:
             early_stopping.initialize()
-            X, X_test, y_true, y_test = train_test_split(X, y_true, test_size = validation_split_ratio, shuffle = True) # manca random state, cos'è?
+            X, X_test, y_true, y_test = train_test_split(X, y_true, test_size = validation_split_ratio, shuffle = True)
         
         # Training
         for epoch in range(n_epochs):
