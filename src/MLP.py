@@ -42,6 +42,7 @@ class MLP:
         self.layers = []
         self.input_size = input_size
         self.output_size = output_size
+        self.task = task
 
         layer_units = [input_size] + hidden_layer_units + [output_size]
         
@@ -49,7 +50,10 @@ class MLP:
 
         for l in range(1, n_layers +1):
 
-            if l < n_layers or task == 'classification':
+            # This needs to be changed for classification, last layer needs to have softmax,
+            # not the activation function of hidden units.
+
+            if l < n_layers or self.task == 'classification':
                 new_layer = Dense(layer_units[l], layer_units[l-1], activation_function)
             else:
                 new_layer = FullyConnectedLayer(layer_units[l], layer_units[l-1])
