@@ -103,12 +103,10 @@ class MAE(ErrorFunction):
             raise ValueError("inputs must have the same shape")
         return np.sign(y_pred-y_true)/(y_true.shape[0]*y_true.shape[1])
 
-"""
-class SoftMaxCrossEntropy(ErrorFunction):
+
+class NLL(ErrorFunction):
     '''
-    Computes the cross entropy for softmax between two np.arrays of all sizes
-    Implemented for particular case of SoftMax because calculating numerically is not very intelligent.
-    Softmax derivative is mathematically easy to find explicitly.
+    Computes the negative log likelihood between two np.arrays of all sizes.
 
     Methods:
         __call__(self,y_true, y_pred): Returns the mean absolute error
@@ -116,7 +114,7 @@ class SoftMaxCrossEntropy(ErrorFunction):
                 y_true: np.array of the true class (one hot vector with 1 in the right class)
                 y_pred: np.array of the predicted values (softmax distribution over the classes)
             Output: Float
-        derivative(self,y_true, y_pred): Returns the derivative of the cross entropy for softmax
+        derivative(self,y_true, y_pred): Returns the derivative of negative log likelihood
             Input: 2 np.arrays of the same shape
             Output: np.array
 
@@ -133,12 +131,15 @@ class SoftMaxCrossEntropy(ErrorFunction):
         return loss / y_true.shape[0]
 
     def derivative(self, y_true, y_pred):
+
+        # This is actually directly with respect to the weights.
+        
         if y_true.shape != y_pred.shape:
             raise ValueError("inputs must have the same shape")
 
         # Average the gradient across the batch
         return (y_pred - y_true) / y_true.shape[0]
-"""
+
 
 def get_metric_instance(metric):
     '''
@@ -153,6 +154,8 @@ def get_metric_instance(metric):
         return MAE()
     elif metric in ["Accuracy", "accuracy", "acc", "ACC", "ACCURACY",'a']:
         return Accuracy()
+    elif metric in ["Negative Log Likelihodd", "NLL"]:
+        return NLL()
     else:
         raise ValueError("Metric function not found")
 
