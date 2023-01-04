@@ -42,6 +42,7 @@ class MLP:
         self.layers = []
         self.input_size = input_size
         self.output_size = output_size
+        self.task = task
 
         layer_units = [input_size] + hidden_layer_units + [output_size]
         
@@ -49,9 +50,14 @@ class MLP:
 
         for l in range(1, n_layers +1):
 
-            if l < n_layers or task == 'classification':
+            # This needs to be changed for classification, last layer needs to have softmax,
+            # not the activation function of hidden units.
+
+            if l < n_layers or self.task == 'classification':
                 new_layer = Dense(layer_units[l], layer_units[l-1], activation_function)
-            else:
+            # self.task == 'classification':
+            #    new_layer = Dense(layer_units[l], layer_units[l-1], "softmax")
+            else: 
                 new_layer = FullyConnectedLayer(layer_units[l], layer_units[l-1])
                 
             
@@ -107,7 +113,7 @@ class MLP:
         # Initializes EarlyStopping
         if early_stopping:
             early_stopping.initialize()
-            X, X_test, y_true, y_test = train_test_split(X, y_true, test_size = validation_split_ratio, shuffle = True) # manca random state, cos'è?
+            X, X_test, y_true, y_test = train_test_split(X, y_true, test_size = validation_split_ratio, shuffle = True)
         
         # Training
         for epoch in range(n_epochs):
@@ -157,6 +163,9 @@ class MLP:
             learning_curve[epoch] = error_function(y_true, y_pred)
 
             # print("Epoch " + str(epoch) + ": " + error + " = " + str(error_function(y_true, y_pred)))
+            if self.task == "classification":
+                print("Epoch " + str(epoch) + ": " + "accuracy" + " = " + str(get_metric_instance("accuracy")(y_true, y_pred)))
+                learning_curve[epoch] = get_metric_instance("accuracy")(y_true, y_pred)
 
         return learning_curve
             

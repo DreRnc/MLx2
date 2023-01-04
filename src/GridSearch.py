@@ -7,6 +7,7 @@ import concurrent.futures
 import time
 import numpy as np
 from sklearn.gaussian_process import GaussianProcessRegressor
+
 class GridSearch():
     '''
     Class for Grid Search
@@ -246,6 +247,7 @@ class GridSearch():
         self.create_folds(n_folds, stratified)
         
         # Creates a list with all the combinations of parameters
+        print(list(product(*list(self.parameters_grid.values()))))
         par_combinations = list(product(*list(self.parameters_grid.values())))
 
         #get the eta
