@@ -95,7 +95,7 @@ class ReLU(ActivationFunction):
     def derivative(self, x):
         return (x > 0).astype(int)
 
-"""
+
 class SoftMax(ActivationFunction):
     '''
     Computes SoftMax Activation Function; output for classification
@@ -113,26 +113,12 @@ class SoftMax(ActivationFunction):
         # Subtract the max for each row (sample) for numerical stability
         x = x - np.max(x, axis=1, keepdims=True)
 
-        return np.exp(x) / np.sum(exps, axis=1, keepdims=True)
+        return np.exp(x) / np.sum(np.exp(x), axis=1, keepdims=True)
     
     def derivative(self, x):
-        return ---------
+        # this is wrong but in nll derivative is already with respect to weights
+        return x
 
------
-
-def cross_entropy_loss(predicted, true):
-  # Calculate the negative log likelihood
-  loss = -np.sum(true * np.log(predicted))
-  # Average the loss across the batch
-  return loss / true.shape[0]
-
-def gradient(predicted, true):
-  # Calculate the gradient
-  grad = predicted - true
-  # Average the gradient across the batch
-  return grad / true.shape[0]
-
-"""
 
 def get_activation_instance(activation):
     '''
@@ -149,5 +135,7 @@ def get_activation_instance(activation):
         return Identity()
     elif activation in ['relu', 'ReLU', 'ReLU()','r','RELU','Relu','re', 'reLU']:
         return ReLU()
+    elif activation in ['softmax', 'SoftMax']:
+        return SoftMax()
     else:
         raise ValueError("Activation function not found")
