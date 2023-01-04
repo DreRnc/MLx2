@@ -15,12 +15,20 @@ class MetricFunction():
 class Accuracy(MetricFunction):
     '''
     Computes the accuracy between two np.arrays of all sizes
+    
+    Atributes:
+    ----------
+    y_true: np.array of the true values
+    y_pred: np.array of the predicted values
+
     Methods:
-        __call__(self,y_true, y_pred): Returns the accuracy
-            Input:  2 np.arrays of the same shape
-                y_true: np.array of the true values can be one hot encoded or binary
-                y_pred: np.array of the predicted values can be one hot encoded or binary
-            Output: Float
+    --------
+    __call__(self,y_true, y_pred): Returns the accuracy
+        Input: np.array
+            y_true: np.array of the true values
+            y_pred: np.array of the predicted values
+        Output: Accuracy
+        
 
     '''
     def __call__(self, y_true, y_pred):

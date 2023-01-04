@@ -24,7 +24,7 @@ class GridSearch():
 
     Methods
     -------
-    fit(X, y, parameters_grid, n_folds = 0, stratified = False, test_size = 0.2, verbose = True):
+    fit(X, y, n_folds = 1, test_size = 0.2, random_state = None, verbose = False, n_jobs = 1, **parameters_grid):
         Performs the grid search and saves the best parameters and the best model
     get_best_parameters(n_results = 1, all = False): 
         Returns the best n parameters found with the scores
@@ -133,6 +133,15 @@ class GridSearch():
             self.folds = list(cv.split(self.X, self.y))
 
     def eta(self, par_combinations, get_eta):
+        '''
+        This method is used to compute the eta of the grid search
+
+        Parameters
+        ----------
+        par_combinations (List): The combinations of parameters to be tested
+        get_eta (Bool): If True the eta is computed
+        '''
+
         if get_eta:
             if len(par_combinations) < 100:
                 pass
@@ -152,6 +161,10 @@ class GridSearch():
                 print(f'ETA: {eta} hours')
 
     def clean_output(self):
+        '''
+        This method is used to clean the output of the grid search
+        '''
+
         self.results = [ [self.scores[i], self.par[i]] for i in range(len(self.scores)) ]
 
         if isinstance(self.loss_function, ErrorFunction):
@@ -171,6 +184,14 @@ class GridSearch():
         self.best_model = self.model
 
     def grid_search(self, par_combinations):
+        '''
+        This method is used to perform the grid search
+
+        Parameters
+        ----------
+        par_combinations (List): The combinations of parameters to be tested
+        '''
+
         if self.parallel:
             print('Parallelisation activated')
 
@@ -246,6 +267,7 @@ class GridSearch():
         self.clean_output()
 
 
+
     def get_best_parameters(self, n_parameters = 1, all = False):
         '''
         Returns the best n parameters
@@ -298,12 +320,17 @@ class RandomGridsearch(GridSearch):
                     futures = [executor.submit(self.compute, values, len(eta_combinations)) for values in eta_combinations]
 
                     concurrent.futures.wait(futures)
-                    self.i = 0
+
+                    for future in concurrent.futures.as_completed(futures):
+                        self.scores.append(future.result()[0])
+                        self.par.append(future.result()[1])
+
                 end = time.time()
                 eta = (end - start) * len(par_combinations) / 100
                 # get the time in hours
                 eta = eta / 3600
                 print(f'ETA: {eta} hours')
+        
 
 
     def fit(self, X, y, parameters_grid, n_folds = 0, stratified = False, test_size = 0.2, verbose = True, parallel = False, n_random = 10, get_eta = False):
