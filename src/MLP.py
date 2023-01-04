@@ -63,7 +63,35 @@ class MLP:
             
             self.layers.append(new_layer)
 
-    
+    def evaluate_model(self, X, y_true, metric = 'generic'):
+        """
+
+        Evaluates model on a set, given a certain metric.
+
+        Parameters
+        -----------
+        X (n_samples x n_inputs) : 
+        y_true (n_samples x n_output) : 
+        metric (str) : metric to evaluate
+
+        """
+        if metric != 'generic':
+            self._eval_metric = metric
+        elif self.task == 'regression':
+            self._eval_metric = 'MSE'
+        elif self.task == 'classification':
+            self._eval_metric = 'accuracy'
+        
+        self._eval_metric = get_metric_instance(self.eval_metric)
+
+        y_pred = self.predict(X)
+
+        return self._eval_metric(y_true, y_pred)
+
+
+
+
+
     def fit(self, X, y_true, n_epochs, batch_size, X_test = None, y_test = None, error = "MSE", regularization = "no", \
         alpha_l1 = 0, alpha_l2 = 0, weights_initialization = "scaled", weights_scale = 0.1, step = 0.1, momentum = 0, Nesterov = False, \
         early_stopping = False, patience = 10, tolerance = 0.01, validation_split_ratio = 0.1, verbose = False):
@@ -163,17 +191,16 @@ class MLP:
 
             y_pred = self.predict(X)
 
-            learning_curve[epoch] = error_function(y_true, y_pred)
+            if self.task == "regression":
+                learning_curve[epoch] = error_function(y_true, y_pred)
+                print("Epoch " + str(epoch) + ": " + error + " = " + str(error_function(y_true, y_pred)))
 
-            # print("Epoch " + str(epoch) + ": " + error + " = " + str(error_function(y_true, y_pred)))
             if self.task == "classification":
                 print("Epoch " + str(epoch) + ": " + "accuracy" + " = " + str(get_metric_instance("accuracy")(y_true, y_pred)))
                 learning_curve[epoch] = get_metric_instance("accuracy")(y_true, y_pred)
 
         return learning_curve
-            
-
-
+      
 
     def predict(self, X):
 
@@ -205,4 +232,3 @@ class MLP:
         y_pred = layer.output
 
         return y_pred
-
