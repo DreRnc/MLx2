@@ -144,6 +144,7 @@ class GridSearch():
         '''
 
         if get_eta:
+            print('Computing ETA')
             if len(par_combinations) < 100:
                 pass
             else:
@@ -247,7 +248,7 @@ class GridSearch():
         self.create_folds(n_folds, stratified)
         
         # Creates a list with all the combinations of parameters
-        print(list(product(*list(self.parameters_grid.values()))))
+        #print(list(product(*list(self.parameters_grid.values()))))
         par_combinations = list(product(*list(self.parameters_grid.values())))
 
         #get the eta
@@ -311,6 +312,9 @@ class RandomGridsearch(GridSearch):
 
     def eta(self, par_combinations, get_eta):
         if get_eta:
+
+            print('Getting ETA')
+
             if len(par_combinations) < 100:
                 pass
             else:
@@ -372,7 +376,7 @@ class RandomGridsearch(GridSearch):
         
         # Creates a list with all the combinations of parameters
         par_combinations = self.random_sample(parameters_grid, n_random)
-        print(type(par_combinations))
+        
         #get the eta
         self.eta(par_combinations, get_eta)
 

@@ -66,7 +66,7 @@ class MLP:
     
     def fit(self, X, y_true, n_epochs, batch_size, X_test = None, y_test = None, error = "MSE", regularization = "no", \
         alpha_l1 = 0, alpha_l2 = 0, weights_initialization = "scaled", weights_scale = 0.1, step = 0.1, momentum = 0, Nesterov = False, \
-        early_stopping = None, validation_split_ratio = 0.1, verbose = False):
+        early_stopping = False, patience = 10, tolerance = 0.01, validation_split_ratio = 0.1, verbose = False):
 
         """
 
@@ -112,9 +112,12 @@ class MLP:
 
         # Initializes EarlyStopping
         if early_stopping:
+            early_stopping = EarlyStopping(patience = patience, tolerance = tolerance, metric = "MSE", mode = "min")
             early_stopping.initialize()
             X, X_test, y_true, y_test = train_test_split(X, y_true, test_size = validation_split_ratio, shuffle = True)
         
+
+
         # Training
         for epoch in range(n_epochs):
 
