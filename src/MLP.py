@@ -141,7 +141,6 @@ class MLP:
             layer.initialize(weights_initialization, weights_scale, regularization, alpha_l1, alpha_l2, step, momentum, Nesterov)
 
         error_function = get_metric_instance(error)
-        learning_curve = np.ndarray((n_epochs,1))
 
         # Initializes EarlyStopping
         if early_stopping:
@@ -152,7 +151,6 @@ class MLP:
             early_stopping.initialize()
             X, X_test, y_true, y_test = train_test_split(X, y_true, test_size = validation_split_ratio, shuffle = True)
         
-
         # Training
         for epoch in range(n_epochs):
 
@@ -198,12 +196,12 @@ class MLP:
             y_pred = self.predict(X)
 
             if self.task == "regression":
-                self.learning_curve[epoch] = error_function(y_true, y_pred)
+                self.learning_curve.append(error_function(y_true, y_pred))
                 if verbose:
                     print("Epoch " + str(epoch) + ": " + error + " = " + str(error_function(y_true, y_pred)))
 
             if self.task == "classification":
-                self.learning_curve[epoch] = get_metric_instance("accuracy")(y_true, y_pred)
+                self.learning_curve.append(get_metric_instance("accuracy")(y_true, y_pred))
                 if verbose:
                     print("Epoch " + str(epoch) + ": " + "accuracy" + " = " + str(get_metric_instance("accuracy")(y_true, y_pred)))
 
