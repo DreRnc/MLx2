@@ -198,12 +198,12 @@ class MLP:
             y_pred = self.predict(X)
 
             if self.task == "regression":
-                self.learning_curve[epoch] = error_function(y_true, y_pred)
+                self.learning_curvee += error_function(y_true, y_pred)
                 if verbose:
                     print("Epoch " + str(epoch) + ": " + error + " = " + str(error_function(y_true, y_pred)))
 
             if self.task == "classification":
-                self.learning_curve[epoch] = get_metric_instance("accuracy")(y_true, y_pred)
+                self.learning_curve += get_metric_instance("accuracy")(y_true, y_pred)
                 if verbose:
                     print("Epoch " + str(epoch) + ": " + "accuracy" + " = " + str(get_metric_instance("accuracy")(y_true, y_pred)))
 
