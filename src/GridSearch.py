@@ -148,7 +148,7 @@ class GridSearch():
                     futures = [executor.submit(self.compute, values, len(eta_combinations)) for values in eta_combinations]
 
                     concurrent.futures.wait(futures)
-                    self.i = 0
+                    #self.i = 0
                 end = time.time()
                 eta = (end - start) * len(par_combinations) / 100
                 # get the time in hours
@@ -257,7 +257,7 @@ class GridSearch():
         elif self.verbose:
             print(f'Grid search of combinations: {len(par_combinations)}')
 
-        self.i = 0
+        #self.i = 0
 
         self.grid_search(par_combinations)
 
@@ -309,13 +309,13 @@ class RandomGridsearch(GridSearch):
 
             print('Getting ETA')
 
-            if len(par_combinations) < 100:
-                pass
+            if len(par_combinations) < 200:
+                print('ETA: less than 1 hour')
             else:
                 # start counting the time
                 start = time.time()
                 # get 100 random combinations
-                eta_combinations = self.random_sample(self.parameters_grid, 100)
+                eta_combinations = self.random_sample(self.parameters_grid, self.eta_len)
                 with concurrent.futures.ProcessPoolExecutor() as executor:
                     futures = [executor.submit(self.compute, values, len(eta_combinations)) for values in eta_combinations]
 
@@ -326,7 +326,7 @@ class RandomGridsearch(GridSearch):
                         self.par.append(future.result()[1])
 
                 end = time.time()
-                eta = (end - start) * len(par_combinations) / 100
+                eta = (end - start) * len(par_combinations) / len(eta_combinations)
                 # get the time in hours
                 eta = eta / 3600
                 print(f'ETA: {eta} hours')
@@ -364,7 +364,7 @@ class RandomGridsearch(GridSearch):
         self.parameters_grid = parameters_grid
         self.test_size = test_size
         self.parallel = parallel
-
+        self.eta_len = 100
         # Creates the folds
         self.create_folds(n_folds, stratified)
         
@@ -380,7 +380,6 @@ class RandomGridsearch(GridSearch):
         if self.verbose:
             print(f'Random search of combinations: {len(par_combinations)}')
 
-        self.i = 0
 
         self.grid_search(par_combinations)
 
