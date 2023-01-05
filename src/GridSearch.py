@@ -32,7 +32,7 @@ class GridSearch():
     '''
 
 
-    def __init__(self, model, loss_function):
+    def __init__(self, model):
         '''
         Constructor
 
@@ -43,14 +43,6 @@ class GridSearch():
         '''
 
         self.model = model
-
-        if type(loss_function) == str:
-            self.loss_function = get_metric_instance(loss_function)
-        else:
-            self.loss_function = loss_function
-        
-
-
 
     def compute(self, values, l):
 
@@ -76,8 +68,7 @@ class GridSearch():
 
         if self.n_folds < 2:
             self.model.fit(self.X_train, self.y_train, **parameters)
-            return self.loss_function(self.y_val, self.model.predict(self.X_val)) , parameters
-
+            score = self.model.evaluate_model(self.X_val, self.y_val)
         else:
             current_fold = 1
             score = 0
@@ -86,18 +77,21 @@ class GridSearch():
                 y_train, y_val = self.y[train_index], self.y[val_index]
 
                 self.model.fit(X_train, y_train, **parameters)
-                score += self.loss_function(y_val, self.model.predict(X_val))
 
-
+                score += self.model.evaluate_model(X_val, y_val)
 
                 current_fold += 1
 
+        self.i = self.i + 1
+
         if self.verbose:
-            #print(f'Combination {self.i}/{l}')        
+            print('-----------------------------------')
+            print(f'Combination {self.i}/{l}')        
             print(f'Parameters: {parameters}')
             print(f'Validation score: {score/self.n_folds}')
-            return score / self.n_folds, parameters
-
+        
+        return score / self.n_folds, parameters
+        
 
     def create_folds(self, n_folds, stratified):
         '''
@@ -168,12 +162,13 @@ class GridSearch():
 
         self.results = [ [self.scores[i], self.par[i]] for i in range(len(self.scores)) ]
 
-        if isinstance(self.loss_function, ErrorFunction):
+        if self.model.task == 'regression':
             self.results.sort(key = lambda x: x[0])
-        else: 
+        elif self.model.task == 'classification':
             self.results.sort(key = lambda x: x[0], reverse = True)
         
         if self.verbose:
+            print('\n')
             print(f'Best parameters: {self.results[0][1]}')
             print(f'Best score: {self.results[0][0]}')
 
@@ -205,14 +200,14 @@ class GridSearch():
                     self.scores.append(future.result()[0])
                     self.par.append(future.result()[1])
         else:
-            print('Parallelisation deactivated')
+            print('Parallelisation not active')
             for values in par_combinations:
                 out = self.compute(values, len(par_combinations))
                 self.scores.append(out[0])
                 self.par.append(out[1])
 
 
-    def fit(self, X, y, parameters_grid, n_folds = 0, stratified = False, test_size = 0.2, verbose = True, parallel = False, random_search = False, n_random = 10, get_eta = False):
+    def fit(self, X, y, parameters_grid, n_folds = 1, stratified = False, test_size = 0.2, verbose = True, parallel = False, random_search = False, n_random = 10, get_eta = False):
         
         '''
         Performs the grid search

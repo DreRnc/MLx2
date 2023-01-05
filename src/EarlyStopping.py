@@ -47,7 +47,10 @@ class EarlyStopping():
         _n_worsening_epochs (int) :
 
         """
-        self._best_metric_value = np.infty 
+        if self.mode == 'min':
+            self._best_metric_value = np.infty 
+        elif self.mode == 'max':
+            self._best_metric_value = -np.infty
         self._n_epochs = 0
         self._n_worsening_epochs = 0
 
@@ -73,7 +76,7 @@ class EarlyStopping():
             metric_value = loss
         else:
             metric_value = self.metric(y_true, y_pred)
-        
+
         if (self.mode == "min" and metric_value < self._best_metric_value - self.tolerance) or (self.mode == "max" and metric_value > self._best_metric_value + self.tolerance):
             self._best_metric_value = metric_value
             self._n_worsening_epochs = 0
@@ -83,4 +86,5 @@ class EarlyStopping():
             self._n_worsening_epochs += 1
             if self._n_worsening_epochs == self.patience:
                 return True
+        
         return False
