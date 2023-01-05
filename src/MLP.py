@@ -1,6 +1,7 @@
 import numpy as np
 import math
 from sklearn.model_selection import train_test_split
+from tqdm import tqdm
 
 from src.Layers import Layer, FullyConnectedLayer, Dense
 from src.MetricFunctions import get_metric_instance
@@ -154,7 +155,7 @@ class MLP:
         
 
         # Training
-        for epoch in range(n_epochs):
+        for epoch in tqdm(range(n_epochs)):
 
             np.random.shuffle(training_set)
             
