@@ -1,6 +1,7 @@
 import numpy as np
 import math
 from sklearn.model_selection import train_test_split
+from tqdm import tqdm
 
 from src.Layers import Layer, FullyConnectedLayer, Dense
 from src.MetricFunctions import get_metric_instance
@@ -152,7 +153,7 @@ class MLP:
             X, X_test, y_true, y_test = train_test_split(X, y_true, test_size = validation_split_ratio, shuffle = True)
         
         # Training
-        for epoch in range(n_epochs):
+        for epoch in tqdm(range(n_epochs)):
 
             np.random.shuffle(training_set)
             
@@ -196,12 +197,12 @@ class MLP:
             y_pred = self.predict(X)
 
             if self.task == "regression":
-                self.learning_curve.append(error_function(y_true, y_pred))
+                self.learning_curvee += error_function(y_true, y_pred)
                 if verbose:
                     print("Epoch " + str(epoch) + ": " + error + " = " + str(error_function(y_true, y_pred)))
 
             if self.task == "classification":
-                self.learning_curve.append(get_metric_instance("accuracy")(y_true, y_pred))
+                self.learning_curve += get_metric_instance("accuracy")(y_true, y_pred)
                 if verbose:
                     print("Epoch " + str(epoch) + ": " + "accuracy" + " = " + str(get_metric_instance("accuracy")(y_true, y_pred)))
 
