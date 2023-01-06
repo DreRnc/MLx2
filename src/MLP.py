@@ -197,7 +197,7 @@ class MLP:
             y_pred = self.predict(X)
 
             if self.task == "regression":
-                self.learning_curvee += error_function(y_true, y_pred)
+                self.learning_curve += error_function(y_true, y_pred)
                 if verbose:
                     print("Epoch " + str(epoch) + ": " + error + " = " + str(error_function(y_true, y_pred)))
 
