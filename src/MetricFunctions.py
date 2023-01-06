@@ -133,14 +133,21 @@ class NLL(ErrorFunction):
             raise ValueError("inputs must have the same shape")
             
         # Calculate the negative log likelihood
-        loss = -np.sum(y_true * np.log(y_pred))
+        loss = -np.sum(y_true * np.log(y_pred) + (1 - y_true) * np.log(1 - y_pred))
 
         # Average the loss across the batch
         return loss / y_true.shape[0]
 
     def derivative(self, y_true, y_pred):
 
-        # This is actually directly with respect to the weights.
+        # This is actually directly with respect to the weight of last layer, not to predicted probability.
+
+        """
+        Questo è sbagliato perchè è direttamente rispetto ai weights,
+        mentre l'ultimo layer poi farà anche la derivata del sigmoid
+        """
+        
+        # That is, with respect to z, not p=sigmoid(z)
         
         if y_true.shape != y_pred.shape:
             raise ValueError("inputs must have the same shape")

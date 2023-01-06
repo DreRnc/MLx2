@@ -1,7 +1,6 @@
 import numpy as np
 import math
 from sklearn.model_selection import train_test_split
-from tqdm import tqdm
 
 from src.Layers import Layer, FullyConnectedLayer, Dense
 from src.MetricFunctions import get_metric_instance
@@ -51,8 +50,6 @@ class MLP:
 
         for l in range(1, n_layers +1):
 
-            # This needs to be changed for classification, last layer needs to have softmax,
-            # not the activation function of hidden units.
 
             if l < n_layers:
                 new_layer = Dense(layer_units[l], layer_units[l-1], activation_function)
@@ -91,12 +88,6 @@ class MLP:
 
         return self._eval_metric(y_true, y_pred)
 
-    def plot_last_fitting (self) :
-        """
-        Returns the learning curve to plot, as saved in the last fit.
-        """
-        return self.learning_curve
-
     def fit(self, X, y_true, n_epochs, batch_size, X_test = None, y_test = None, error = "MSE", regularization = "no", \
         alpha_l1 = 0, alpha_l2 = 0, weights_initialization = "scaled", weights_scale = 0.1, step = 0.1, momentum = 0, Nesterov = False, \
         early_stopping = False, patience = 10, tolerance = 0.01, validation_split_ratio = 0.1, verbose = False):
@@ -129,7 +120,7 @@ class MLP:
         input_size = X.shape[1]
         output_size = y_true.shape[1]
         n_samples = X.shape[0]
-        self.learning_curve = []
+        self.learning_curve = np.zeros(n_epochs)
 
         if input_size != self.input_size or output_size != self.output_size:
             raise Exception("Dimension Error!")
@@ -153,7 +144,8 @@ class MLP:
             X, X_test, y_true, y_test = train_test_split(X, y_true, test_size = validation_split_ratio, shuffle = True)
         
         # Training
-        for epoch in tqdm(range(n_epochs)):
+        
+        for epoch in range(n_epochs):
 
             np.random.shuffle(training_set)
             
@@ -197,12 +189,12 @@ class MLP:
             y_pred = self.predict(X)
 
             if self.task == "regression":
-                self.learning_curvee += error_function(y_true, y_pred)
+                self.learning_curve[epoch] = (error_function(y_true, y_pred))
                 if verbose:
                     print("Epoch " + str(epoch) + ": " + error + " = " + str(error_function(y_true, y_pred)))
 
             if self.task == "classification":
-                self.learning_curve += get_metric_instance("accuracy")(y_true, y_pred)
+                self.learning_curve[epoch] = (get_metric_instance('acc')(y_true, y_pred))
                 if verbose:
                     print("Epoch " + str(epoch) + ": " + "accuracy" + " = " + str(get_metric_instance("accuracy")(y_true, y_pred)))
 
