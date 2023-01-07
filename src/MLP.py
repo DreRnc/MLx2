@@ -89,7 +89,7 @@ class MLP:
         return self._eval_metric(y_true, y_pred)
 
     def fit(self, X, y_true, n_epochs, batch_size, X_test = None, y_test = None, error = "MSE", regularization = "no", \
-        alpha_l1 = 0, alpha_l2 = 0, weights_initialization = "scaled", weights_scale = 0.1, step = 0.1, momentum = 0, Nesterov = False, backprop_variant = 'no'\
+        alpha_l1 = 0, alpha_l2 = 0, weights_initialization = "scaled", weights_scale = 0.1, step = 0.1, momentum = 0, Nesterov = False, backprop_variant = 'no', \
         early_stopping = None, validation_split_ratio = 0.1, verbose = False):
 
         """

@@ -123,9 +123,9 @@ class FullyConnectedLayer(Layer):
         #save last weigths and biases update for HBG
         self._last_weights_update = 0
         self._last_biases_update = 0
-        if backprop_variant =='quickprop':
-            self._last_grad_weights = 0
-            self._last_grad_biases = 0
+
+        self._last_grad_weights = 0
+        self._last_grad_biases = 0
 
         # Optimizer initialization
         self.optimizer = HeavyBallGradient(step, momentum, Nesterov)
@@ -228,17 +228,12 @@ class FullyConnectedLayer(Layer):
         grad_weights = np.matmul(self._input.T, grad_output) + self.regularization_function.derivative(weights)
         grad_biases = grad_output.sum(axis = 0, keepdims = True)
 
+        weights_update, biases_update = self.optimizer(grad_weights, grad_biases, \
+            self._last_weights_update, self._last_biases_update, self.backprop_variant, self._last_grad_weights, self._last_grad_biases)
+
         if self.backprop_variant == 'quickprop':
-            grad2_weights = grad_weights / (grad_weights - self.last_grad_weights)
-            grad2_biases = grad_biases / (grad_biases - self.last_grad_biases)
             self._last_grad_weights = grad_weights
             self._last_grad_biases = grad_biases
-        else:
-            grad2_weights = 'no'
-            grad2_biases = 'no'
-
-        weights_update, biases_update = self.optimizer(grad_weights, grad_biases, \
-            self._last_weights_update, self._last_biases_update, self.backprop_variant, grad2_weights, grad2_biases)
 
         self._biases += biases_update
         self._weights += weights_update
