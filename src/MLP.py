@@ -50,20 +50,44 @@ class MLP:
 
         for l in range(1, n_layers +1):
 
-            # This needs to be changed for classification, last layer needs to have softmax,
-            # not the activation function of hidden units.
 
-            if l < n_layers or self.task == 'classification':
+            if l < n_layers:
                 new_layer = Dense(layer_units[l], layer_units[l-1], activation_function)
-            # self.task == 'classification':
+            elif self.task == 'classification': 
+                new_layer = Dense(layer_units[l], layer_units[l-1], "sigmoid")
+            # self.task == 'multiple output classification':
             #    new_layer = Dense(layer_units[l], layer_units[l-1], "softmax")
-            else: 
+            else:
                 new_layer = FullyConnectedLayer(layer_units[l], layer_units[l-1])
                 
             
             self.layers.append(new_layer)
 
-    
+    def evaluate_model(self, X, y_true, metric = 'generic'):
+        """
+
+        Evaluates model on a set, given a certain metric.
+
+        Parameters
+        -----------
+        X (n_samples x n_inputs) : 
+        y_true (n_samples x n_output) : 
+        metric (str) : metric to evaluate
+
+        """
+        if metric != 'generic':
+            self._eval_metric = metric
+        elif self.task == 'regression':
+            self._eval_metric = 'MSE'
+        elif self.task == 'classification':
+            self._eval_metric = 'accuracy'
+        
+        self._eval_metric = get_metric_instance(self._eval_metric)
+
+        y_pred = self.predict(X)
+
+        return self._eval_metric(y_true, y_pred)
+
     def fit(self, X, y_true, n_epochs, batch_size, X_test = None, y_test = None, error = "MSE", regularization = "no", \
         alpha_l1 = 0, alpha_l2 = 0, weights_initialization = "scaled", weights_scale = 0.1, step = 0.1, momentum = 0, Nesterov = False, backprop_variant = 'no'\
         early_stopping = None, validation_split_ratio = 0.1, verbose = False):
@@ -96,6 +120,7 @@ class MLP:
         input_size = X.shape[1]
         output_size = y_true.shape[1]
         n_samples = X.shape[0]
+        self.learning_curve = np.zeros(n_epochs)
 
         if input_size != self.input_size or output_size != self.output_size:
             raise Exception("Dimension Error!")
@@ -108,14 +133,18 @@ class MLP:
             layer.initialize(weights_initialization, weights_scale, regularization, alpha_l1, alpha_l2, step, momentum, Nesterov, backprop_variant)
 
         error_function = get_metric_instance(error)
-        learning_curve = np.ndarray((n_epochs,1))
 
         # Initializes EarlyStopping
         if early_stopping:
+            if self.task == "classification":
+                early_stopping = EarlyStopping(patience = patience, tolerance = tolerance, metric = "accuracy", mode = "max")
+            if self.task == "regression":
+                early_stopping = EarlyStopping(patience = patience, tolerance = tolerance, metric = error, mode = "min")
             early_stopping.initialize()
             X, X_test, y_true, y_test = train_test_split(X, y_true, test_size = validation_split_ratio, shuffle = True)
         
         # Training
+        
         for epoch in range(n_epochs):
 
             np.random.shuffle(training_set)
@@ -123,9 +152,9 @@ class MLP:
             TR = np.split(training_set, [input_size], axis = 1)
             X = TR[0]
             y_true = TR[1]
-            
-            X_batches = np.array_split(X, [batch_size]*(n_batches-1), axis = 0)
-            y_true_batches = np.array_split(y_true, [batch_size]*(n_batches-1), axis= 0)
+
+            X_batches = np.split(X, range(batch_size, X.shape[0], batch_size), axis = 0)
+            y_true_batches = np.split(y_true, range(batch_size, y_true.shape[0],batch_size), axis= 0)
 
             for batch in range(n_batches):
 
@@ -151,8 +180,7 @@ class MLP:
                 stop = early_stopping.on_epoch_end(test_loss, y_test, y_pred_test, params)
 
                 if stop:
-                    if verbose:
-                        print("\nEarly stopped training")
+                    print(f"Early stopped training on epoch {epoch}")
                     best_params = early_stopping._best_params
                     for layer, layer_best_params in zip(self.layers, best_params):
                         layer.set_params(layer_best_params)
@@ -160,16 +188,15 @@ class MLP:
 
             y_pred = self.predict(X)
 
-            learning_curve[epoch] = error_function(y_true, y_pred)
+            if self.task == "regression":
+                self.learning_curve[epoch] = (error_function(y_true, y_pred))
+                if verbose:
+                    print("Epoch " + str(epoch) + ": " + error + " = " + str(error_function(y_true, y_pred)))
 
-            # print("Epoch " + str(epoch) + ": " + error + " = " + str(error_function(y_true, y_pred)))
             if self.task == "classification":
-                print("Epoch " + str(epoch) + ": " + "accuracy" + " = " + str(get_metric_instance("accuracy")(y_true, y_pred)))
-                learning_curve[epoch] = get_metric_instance("accuracy")(y_true, y_pred)
-
-        return learning_curve
-            
-
+                self.learning_curve[epoch] = (get_metric_instance('acc')(y_true, y_pred))
+                if verbose:
+                    print("Epoch " + str(epoch) + ": " + "accuracy" + " = " + str(get_metric_instance("accuracy")(y_true, y_pred)))
 
 
     def predict(self, X):
@@ -188,6 +215,7 @@ class MLP:
         """
         
         (n_samples, input_size) = X.shape
+
         if input_size != self.input_size:
             raise Exception("Dimension Error!")
 
@@ -202,4 +230,3 @@ class MLP:
         y_pred = layer.output
 
         return y_pred
-

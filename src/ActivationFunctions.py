@@ -71,10 +71,10 @@ class Tanh(ActivationFunction):
             Output: np.array
     '''
     def __call__(self, x):
-        return np.than(x)
+        return np.tanh(x)
     
     def derivative(self, x):
-        return 1-np.square(np.than(x))
+        return 1-np.square(np.tanh(x))
     
 
 class ReLU(ActivationFunction):
