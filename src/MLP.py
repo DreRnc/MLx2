@@ -25,7 +25,7 @@ class MLP:
 
     """
 
-    def __init__(self, hidden_layer_units, input_size, output_size, activation_function = 'sigm', task = 'regression'):
+    def __init__(self, hidden_layer_units, input_size, output_size, activation_function = 'sigm', task = 'regression', random_seed = 0):
 
         """
         Build MLP for regression (the last layer is fully connected)
@@ -47,6 +47,8 @@ class MLP:
         layer_units = [input_size] + hidden_layer_units + [output_size]
         
         n_layers = len(layer_units) - 1 
+
+        np.random.seed(random_seed)
 
         for l in range(1, n_layers +1):
 
@@ -90,8 +92,8 @@ class MLP:
         return eval_metric(y_true, y_pred)
 
     def fit(self, X, y_true, n_epochs, batch_size, X_test = None, y_test = None, error = "MSE", eval_metric = "default", regularization = "no", \
-        alpha_l1 = 0, alpha_l2 = 0, weights_initialization = "scaled", weights_scale = 0.1, weights_mean = 0, step = 0.1, momentum = 0, Nesterov = False, backprop_variant = 'no', \
-        early_stopping = True, validation_split_ratio = 0.1, verbose = False, patience = 10, tolerance = 0.01):
+        alpha_l1 = 0, alpha_l2 = 0, weights_initialization = "scaled", weights_scale = 0.01, weights_mean = 0, step = 0.1, momentum = 0, Nesterov = False, backprop_variant = 'no', \
+        early_stopping = True, validation_split_ratio = 0.1, random_seed = 0, verbose = False, patience = 10, tolerance = 0.01):
 
         """
 
@@ -143,7 +145,6 @@ class MLP:
         if input_size != self.input_size or output_size != self.output_size:
             raise Exception("Dimension Error!")
 
-
         for layer in self.layers:
             layer.initialize(weights_initialization, weights_scale, weights_mean, regularization, alpha_l1, alpha_l2, step, momentum, Nesterov, backprop_variant)
 
@@ -153,7 +154,7 @@ class MLP:
         if early_stopping:
             early_stopping = EarlyStopping(patience = patience, tolerance = tolerance, metric = self._eval_metric)
             early_stopping.initialize()
-            X, X_test, y_true, y_test = train_test_split(X, y_true, test_size = validation_split_ratio, shuffle = True)
+            X, X_test, y_true, y_test = train_test_split(X, y_true, test_size = validation_split_ratio, shuffle = True, random_state = random_seed)
         
         # training_set = np.concatenate((X, y_true), axis = 1)
         n_batches = math.ceil(X.shape[0]/batch_size)
