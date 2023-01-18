@@ -3,6 +3,7 @@ class MLP:
         pass
 
     def add_layer(self, layer):
+        
         pass
     
     def fit(self, X, y):
