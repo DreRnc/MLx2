@@ -2,7 +2,7 @@ import numpy as np
 from src.ActivationFunctions import get_activation_instance
 from src.RegularizationFunctions import get_regularization_instance
 from src.Optimizers import HeavyBallGradient
-
+from math import sqrt
 
 class Layer:
 
@@ -86,7 +86,7 @@ class FullyConnectedLayer(Layer):
         self.n_units = n_units
         self.n_inputs_per_unit = n_inputs_per_unit
 
-    def initialize(self, weights_initialization, weights_scale, regularization_function, alpha_l1, alpha_l2, step, momentum, Nesterov, backprop_variant):
+    def initialize(self, weights_initialization, weights_scale, weights_mean, regularization_function, alpha_l1, alpha_l2, step, momentum, Nesterov, backprop_variant):
 
         """
         
@@ -97,7 +97,8 @@ class FullyConnectedLayer(Layer):
         ----------
         
         weights_initialization (str): type of initialization for weights
-        weights_scale (int): scale for initialization of weights
+        weights_scale (int): std of the normal distribution for initialization of weights
+        weights_mean (int): mean of the normal distribution for initialization of weights
         regularization_function (RegularizationFunction): regularization function for the layer
         alpha_l1
         alpha_l2
@@ -109,15 +110,19 @@ class FullyConnectedLayer(Layer):
         scale = weights_scale
         # Weight initialization
         if weights_initialization == "scaled":
-            scale = weights_scale
+            self._weights = np.random.normal(loc = weights_mean, scale = weights_scale, size = (self.n_inputs_per_unit, self.n_units))
         elif weights_initialization == "xavier":
-            scale = 1 / self.n_input
+            # 1 / sqrt(n_inputs_per_unit) with numpy
+            bound = 1 / sqrt(self.n_inputs_per_unit)
+            self._weights = np.random.uniform(low = -bound, high = bound, size = (self.n_inputs_per_unit, self.n_units))
+
         elif weights_initialization == "he":
-            scale = 2 / self.n_input
+            bound = 2 / sqrt(self.n_inputs_per_unit)
+            self._weights = np.random.uniform(low = -bound, high = bound, size = (self.n_inputs_per_unit, self.n_units))
         else:
             print("invalid weigths initialization: choose one between 'scaled', 'xavier', 'he' ")
 
-        self._weights = np.random.normal(loc = 0.0, scale = scale, size = (self.n_inputs_per_unit, self.n_units))
+        
         self._biases = np.zeros((1, self.n_units))
 
         #save last weigths and biases update for HBG
@@ -336,7 +341,7 @@ class Dense(Layer):
         self._fully_connected_layer = FullyConnectedLayer(n_units, n_inputs_per_unit)
         self._activation_layer = ActivationLayer(activation)
 
-    def initialize(self, weights_initialization, weights_scale, regularization, alpha_l1, alpha_l2, step, momentum, Nesterov, backprop_variant):
+    def initialize(self, weights_initialization, weights_scale, weights_mean, regularization, alpha_l1, alpha_l2, step, momentum, Nesterov, backprop_variant):
 
         """
         
@@ -356,7 +361,7 @@ class Dense(Layer):
 
         """
 
-        self._fully_connected_layer.initialize(weights_initialization, weights_scale, regularization, alpha_l1, alpha_l2, step, momentum, Nesterov, backprop_variant)
+        self._fully_connected_layer.initialize(weights_initialization, weights_scale, weights_mean, regularization, alpha_l1, alpha_l2, step, momentum, Nesterov, backprop_variant)
 
     def get_params(self):
 

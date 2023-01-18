@@ -90,8 +90,8 @@ class MLP:
         return self._eval_metric(y_true, y_pred)
 
     def fit(self, X, y_true, n_epochs, batch_size, X_test = None, y_test = None, error = "MSE", regularization = "no", \
-        alpha_l1 = 0, alpha_l2 = 0, weights_initialization = "scaled", weights_scale = 0.1, step = 0.1, momentum = 0, Nesterov = False, backprop_variant = 'no', \
-        early_stopping = None, validation_split_ratio = 0.1, verbose = False):
+        alpha_l1 = 0, alpha_l2 = 0, weights_initialization = "scaled", weights_scale = 0.1, weights_mean = 0, step = 0.1, momentum = 0, Nesterov = False, backprop_variant = 'no', \
+        early_stopping = None, validation_split_ratio = 0.1, verbose = False, patience = 10, tolerance = 0.01):
 
         """
 
@@ -114,12 +114,19 @@ class MLP:
         momentum (float) : 
         early_stopping (bool) :
         validation_split_ratio (float) :
-
+        verbose (bool) :
+        patience (int) :
+        tolerance (float) :
+        scale (float) :
+        mean (float) : 
         """
         n_epochs = int(n_epochs)
         batch_size = int(batch_size)
         input_size = X.shape[1]
-        output_size = y_true.shape[1]
+        try:
+            output_size = y_true.shape[1]
+        except:
+            output_size = 1
         n_samples = X.shape[0]
         self.learning_curve = np.zeros(n_epochs)
 
@@ -132,7 +139,7 @@ class MLP:
         n_batches = math.ceil(n_samples/batch_size)
 
         for layer in self.layers:
-            layer.initialize(weights_initialization, weights_scale, regularization, alpha_l1, alpha_l2, step, momentum, Nesterov, backprop_variant)
+            layer.initialize(weights_initialization, weights_scale, weights_mean, regularization, alpha_l1, alpha_l2, step, momentum, Nesterov, backprop_variant)
 
         error_function = get_metric_instance(error)
 
