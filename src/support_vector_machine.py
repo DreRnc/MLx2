@@ -67,7 +67,6 @@ def calculate_cost_gradient(W, X_batch, Y_batch):
 
     distance = 1 - (Y_batch * np.dot(X_batch, W))
     dw = np.zeros(len(W))
-
     for ind, d in enumerate(distance):
         if max(0, d) == 0:
             di = W
@@ -175,7 +174,7 @@ init()
 
 
 class SVM:
-    def __init__(self, C = 10000, l = 0.000001, max_ep = 5000, c_th = 0.01) -> None:
+    def __init__(self, C=10000, l=0.000001, max_ep=5000, c_th=0.01) -> None:
         self.X = None
         self.y = None
         self.W = None
@@ -189,33 +188,22 @@ class SVM:
     def train(self, X, y):
         w = np.zeros(X.shape[1])
         for epoch in range(1, self.max_ep):
-
+            X, y = shuffle(X, y)
             for ind, x in enumerate(X):
-                w = w - self.l * self.get_dw(w, X, y)
-
+                w += - self.l * self.get_dw(w, x, y[ind])
             if (epoch & (epoch - 1) == 0) or (epoch - 1 == self.max_ep):
                 cost = self.cost(w, X, y)
                 print(f"Epoch: {epoch}, Cost: {cost}")
-
                 if abs(self.last_cost - cost) < self.c_th * self.last_cost:
                     return w
-
                 self.last_cost = cost
+        return w
 
     def cost(self, w, x, y):
         dist = 1 - y * (np.dot(x, w))
         dist[dist < 0] = 0
         return 1/2 * np.dot(w, w) + self.C/self.n * np.sum(dist)
 
-    def get_dw(self, w : np.array, x, y):
-        dists = 1 - y * (np.dot(x, w))
-        dw = w.cop
-        dist[dist < 0] = 0
-
-        for i, dist in enumerate(dists):
-            if max(0, dist) == 0:
-                dw += w
-            else:
-                dw += w - self.C * y[i] * x[i]
-
-        return dw / len(y)
+    def get_dw(self, w: np.array, x, y) -> float:
+        dist = 1 - y * (np.dot(x, w))
+        return - self.C * y * x if np.dot > 0 else 0
