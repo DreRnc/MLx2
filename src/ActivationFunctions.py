@@ -1,3 +1,4 @@
+
 import numpy as np
 
 class ActivationFunction():
@@ -115,9 +116,13 @@ class SoftMax(ActivationFunction):
 
         return np.exp(x) / np.sum(np.exp(x), axis=1, keepdims=True)
     
-    def derivative(self, x):
+    def derivative(self, x, NLL_simplify = False):
         # this is wrong but in nll derivative is already with respect to weights
-        return x
+        if NLL_simplify:
+            return 1
+        else:
+            return self(x) * (1 - self(x))
+        
 
 
 def get_activation_instance(activation):

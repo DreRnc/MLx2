@@ -3,8 +3,9 @@ import math
 from sklearn.model_selection import train_test_split
 
 from src.Layers import Layer, FullyConnectedLayer, Dense
-from src.MetricFunctions import get_metric_instance
+from src.MetricFunctions import NLL, get_metric_instance
 from src.EarlyStopping import EarlyStopping
+from src.ActivationFunctions import SoftMax
 
 class MLP:
 
@@ -54,7 +55,7 @@ class MLP:
             if l < n_layers:
                 new_layer = Dense(layer_units[l], layer_units[l-1], activation_function)
             elif self.task == 'classification': 
-                new_layer = Dense(layer_units[l], layer_units[l-1], "sigmoid")
+                new_layer = Dense(layer_units[l], layer_units[l-1], "softmax")
             # self.task == 'multiple output classification':
             #    new_layer = Dense(layer_units[l], layer_units[l-1], "softmax")
             else:
@@ -125,6 +126,7 @@ class MLP:
         if input_size != self.input_size or output_size != self.output_size:
             raise Exception("Dimension Error!")
 
+
         training_set = np.concatenate((X, y_true), axis = 1)
 
         n_batches = math.ceil(n_samples/batch_size)
@@ -167,7 +169,9 @@ class MLP:
                 
                 for layer in reversed(self.layers):
 
-                    grad_inputs = layer.backprop(grad_outputs)
+                    NLL_simplify=isinstance(error_function, NLL) and isinstance(layer._activation_layer.activation, SoftMax)
+
+                    grad_inputs = layer.backprop(grad_outputs, NLL_simplify)
                     grad_outputs = grad_inputs
             
             if early_stopping:
