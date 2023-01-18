@@ -117,7 +117,8 @@ class SoftMax(ActivationFunction):
     
     def derivative(self, x):
         # this is wrong but in nll derivative is already with respect to weights
-        return x
+        raise NotImplementedError()
+        # return
 
 
 def get_activation_instance(activation):
