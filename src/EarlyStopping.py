@@ -23,7 +23,7 @@ class EarlyStopping():
                 self.metric = metric
             else:
                 self.metric = get_metric_instance(metric)
-        elif issubclass(metric, MetricFunction):
+        elif isinstance(metric, MetricFunction):
             self.metric = metric 
         else:
             raise ValueError("The metric must be a Metric object or as string alias for it, or 'loss'.")
@@ -31,7 +31,7 @@ class EarlyStopping():
         self.patience = patience
         self.tolerance = tolerance
 
-        if issubclass(Accuracy, self.metric):
+        if isinstance(self.metric, Accuracy):
             self.mode = "max"
         else:
             self.mode = "min"

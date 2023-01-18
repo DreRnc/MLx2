@@ -202,7 +202,7 @@ class FullyConnectedLayer(Layer):
 
 
 
-    def backprop(self, grad_output, NLL_simplify = False):
+    def backprop(self, grad_output):
         
 
         """
@@ -294,7 +294,7 @@ class ActivationLayer(Layer):
 
         return self.activation(input)
 
-    def backprop(self, grad_output, NLL_simplify=False):
+    def backprop(self, grad_output):
         
         """
         
@@ -310,10 +310,7 @@ class ActivationLayer(Layer):
 
         """
 
-        if NLL_simplify:
-            return grad_output * self.activation.derivative(self._input, NLL_simplify)
-        else:
-            return grad_output * self.activation.derivative(self._input)
+        return grad_output * self.activation.derivative(self._input)
 
 
 
@@ -418,7 +415,7 @@ class Dense(Layer):
         return self._activation_layer.forwardprop(output_FCL)
 
 
-    def backprop (self, grad_output, NLL_simplify=False):
+    def backprop (self, grad_output):
 
         """
         
@@ -437,7 +434,7 @@ class Dense(Layer):
 
         """
 
-        grad_output_FCL = self._activation_layer.backprop(grad_output, NLL_simplify)
+        grad_output_FCL = self._activation_layer.backprop(grad_output)
 
         return self._fully_connected_layer.backprop(grad_output_FCL)
 

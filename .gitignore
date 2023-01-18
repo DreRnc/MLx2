@@ -8,3 +8,4 @@ src/__pycache__/MetricFunctions.cpython-310.pyc
 src/__pycache__/MLP.cpython-310.pyc
 src/__pycache__/Optimizers.cpython-310.pyc
 src/__pycache__/RegularizationFunctions.cpython-310.pyc
+data/__pycache__/load_data.cpython-310.pyc

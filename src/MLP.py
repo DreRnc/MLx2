@@ -137,6 +137,8 @@ class MLP:
         n_batches = math.ceil(n_samples/batch_size)
         self.learning_curve = np.zeros(n_epochs)
         self.validation_curve = np.zeros(n_epochs)
+        self.learning_accuracy_curve = np.zeros(n_epochs)
+        self.test_accuracy_curve = np.zeros(n_epochs)
 
         if input_size != self.input_size or output_size != self.output_size:
             raise Exception("Dimension Error!")
@@ -183,15 +185,19 @@ class MLP:
                     grad_inputs = layer.backprop(grad_outputs)
                     grad_outputs = grad_inputs
             
+            # Validation/Test Set: saving statistics and learning curve
+
+            if X_test is not None:
+                    y_pred_test = self.predict(X_test)
+                    test_metric = self._eval_metric(y_test, y_pred_test)
+                    self.validation_curve[epoch] = test_metric
+                    if self.task == 'classification':
+                        self.test_accuracy_curve[epoch] = get_metric_instance('acc')(y_test, y_pred_test)
+
             if early_stopping:
 
-                if X_test is not None:
-                    y_pred_test = self.predict(X_test)
-                    test_loss = error_function(y_test, y_pred_test)
-                    self.validation_curve[epoch] = test_loss
-                
                 params = [layer.get_params() for layer in self.layers]
-                stop = early_stopping.on_epoch_end(test_loss, y_test, y_pred_test, params)
+                stop = early_stopping.on_epoch_end(test_metric, y_test, y_pred_test, params)
 
                 if stop:
                     print(f"Early stopped training on epoch {epoch}")
@@ -202,15 +208,12 @@ class MLP:
 
             y_pred = self.predict(X)
 
-            if self.task == "regression":
-                self.learning_curve[epoch] = (self._eval_metric(y_true, y_pred))
-                if verbose:
-                    print("Epoch " + str(epoch) + ": " + error + " = " + str(self._eval_metric(y_true, y_pred)))
+            self.learning_curve[epoch] = (self._eval_metric(y_true, y_pred))
+            if self.task == 'classification':
+                self.learning_accuracy_curve[epoch] = get_metric_instance('acc')(y_true, y_pred)
 
-            if self.task == "classification":
-                self.learning_curve[epoch] = (self._eval_metric(y_true, y_pred))
-                if verbose:
-                    print("Epoch " + str(epoch) + ": " + "accuracy" + " = " + str(self._eval_metric(y_true, y_pred)))
+            if verbose:
+                print("Epoch " + str(epoch) + ": " + "metric" + " = " + str(self._eval_metric(y_true, y_pred)))
 
 
     def predict(self, X):
