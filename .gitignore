@@ -1,1 +1,10 @@
 mlx2env
+src/__pycache__/ActivationFunctions.cpython-310.pyc
+src/__pycache__/BestModelSearch.cpython-310.pyc
+src/__pycache__/EarlyStopping.cpython-310.pyc
+src/__pycache__/GridSearch.cpython-310.pyc
+src/__pycache__/Layers.cpython-310.pyc
+src/__pycache__/MetricFunctions.cpython-310.pyc
+src/__pycache__/MLP.cpython-310.pyc
+src/__pycache__/Optimizers.cpython-310.pyc
+src/__pycache__/RegularizationFunctions.cpython-310.pyc
