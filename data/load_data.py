@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-def load_monk(file):
+def load_monk(file, labels):
     """
     Loads Monk Dataset
     """
@@ -16,8 +16,13 @@ def load_monk(file):
             y_true.append(label)
         X = np.array(X, dtype="float16")
         y_true = np.array(y_true, dtype="float16")
-    
-    return [X, y_true]
+
+        X = pd.DataFrame(X, columns=labels[1:])
+
+        # one hot encoding of X_train and X_test
+        X = pd.get_dummies(X, columns=labels[1:])
+       
+        return X.values, y_true
 
     
 def load_MLCup(file, labels):

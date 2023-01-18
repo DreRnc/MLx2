@@ -32,7 +32,7 @@ class Accuracy(MetricFunction):
 
     '''
     def __call__(self, y_true, y_pred):
-        if y_true.shape != y_pred.shape: 
+        if y_true.shape != y_pred.shape:
             raise ValueError("inputs must have the same shape")
         if y_true.shape[1]>1: #for the case of one hot encoding
             y_true = np.argmax(y_true, axis=1)
@@ -85,7 +85,9 @@ class MSE(ErrorFunction):
             raise ValueError("inputs must have the same shape")
         #we are deviding by the number of samples since we are using the mean of th gradients in a batch and not the sum
         # we are also not multiplying by 2 to simplify the backpropagation
+
         return (y_pred - y_true) / y_true.shape[0]
+        # non (y_pred - y_true) / (y_true.shape[0] * y_true.shape[1]) ?
 
 class MAE(ErrorFunction):
     '''
@@ -153,7 +155,8 @@ class NLL(ErrorFunction):
             raise ValueError("inputs must have the same shape")
 
         # Average the gradient across the batch
-        return (y_pred - y_true) / y_true.shape[0]
+        
+        return (y_pred - y_true) /  y_true.shape[0]
 
 
 def get_metric_instance(metric):
@@ -169,7 +172,7 @@ def get_metric_instance(metric):
         return MAE()
     elif metric in ["Accuracy", "accuracy", "acc", "ACC", "ACCURACY",'a']:
         return Accuracy()
-    elif metric in ["Negative Log Likelihodd", "NLL"]:
+    elif metric in ["Negative Log Likelihood", "NLL"]:
         return NLL()
     else:
         raise ValueError("Metric function not found")

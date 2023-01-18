@@ -153,7 +153,7 @@ class FullyConnectedLayer(Layer):
         ----------
         Dictionary of parameters from the layer. 
             "weights" is a matrix
-            "bias" is a vector
+            "bias" is a vectormodel_search.get_best_parameters
 
         """
 
@@ -294,7 +294,7 @@ class ActivationLayer(Layer):
 
         return self.activation(input)
 
-    def backprop(self, grad_output):
+    def backprop(self, grad_output, NLL_simplify=False):
         
         """
         
@@ -310,8 +310,10 @@ class ActivationLayer(Layer):
 
         """
 
-
-        return grad_output * self.activation.derivative(self._input)
+        if NLL_simplify:
+            return grad_output * self.activation.derivative(self._input, NLL_simplify)
+        else:
+            return grad_output * self.activation.derivative(self._input)
 
 
 
@@ -416,7 +418,7 @@ class Dense(Layer):
         return self._activation_layer.forwardprop(output_FCL)
 
 
-    def backprop (self, grad_output):
+    def backprop (self, grad_output, NLL_simplify=False):
 
         """
         
@@ -435,6 +437,7 @@ class Dense(Layer):
 
         """
 
-        grad_output_FCL = self._activation_layer.backprop(grad_output)
+        grad_output_FCL = self._activation_layer.backprop(grad_output, NLL_simplify)
+
         return self._fully_connected_layer.backprop(grad_output_FCL)
 
