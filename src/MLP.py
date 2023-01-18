@@ -122,6 +122,8 @@ class MLP:
         """
         n_epochs = int(n_epochs)
         batch_size = int(batch_size)
+        n_batches = math.ceil(n_samples/batch_size)
+        
         input_size = X.shape[1]
         try:
             output_size = y_true.shape[1]
@@ -135,8 +137,6 @@ class MLP:
 
 
         training_set = np.concatenate((X, y_true), axis = 1)
-
-        n_batches = math.ceil(n_samples/batch_size)
 
         for layer in self.layers:
             layer.initialize(weights_initialization, weights_scale, weights_mean, regularization, alpha_l1, alpha_l2, step, momentum, Nesterov, backprop_variant)
