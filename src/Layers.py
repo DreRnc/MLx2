@@ -153,7 +153,7 @@ class FullyConnectedLayer(Layer):
         ----------
         Dictionary of parameters from the layer. 
             "weights" is a matrix
-            "bias" is a vector
+            "bias" is a vectormodel_search.get_best_parameters
 
         """
 

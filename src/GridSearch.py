@@ -9,6 +9,7 @@ import numpy as np
 from tqdm import tqdm
 from sklearn.gaussian_process import GaussianProcessRegressor
 
+
 class GridSearch():
     '''
     Class for Grid Search
@@ -80,7 +81,7 @@ class GridSearch():
                 self.model.fit(X_train, y_train, **parameters)
 
                 score += self.model.evaluate_model(X_val, y_val)
-
+                #del(self.model)
                 current_fold += 1
 
         self.i = self.i + 1
@@ -136,22 +137,24 @@ class GridSearch():
         par_combinations (List): The combinations of parameters to be tested
         get_eta (Bool): If True the eta is computed
         '''
-
+        num_of_iter = 260
+        
         if get_eta:
             print('Computing ETA')
-            if len(par_combinations) < 100:
+            if len(par_combinations) < num_of_iter:
                 pass
+                print('Eta is short')
             else:
                 # start counting the time
                 start = time.time()
-                eta_combinations = random.sample(par_combinations, 100)
+                eta_combinations = random.sample(par_combinations, num_of_iter)
                 with concurrent.futures.ProcessPoolExecutor() as executor:
                     futures = [executor.submit(self.compute, values, len(eta_combinations)) for values in eta_combinations]
 
                     concurrent.futures.wait(futures)
                     #self.i = 0
                 end = time.time()
-                eta = (end - start) * len(par_combinations) / 100
+                eta = (end - start) * len(par_combinations) / num_of_iter
                 # get the time in hours
                 eta = eta / 3600
                 print(f'ETA: {eta} hours')
@@ -238,6 +241,7 @@ class GridSearch():
         self.parameters_grid = parameters_grid
         self.test_size = test_size
         self.parallel = parallel
+        
 
         # Creates the folds
         self.create_folds(n_folds, stratified)
@@ -247,7 +251,7 @@ class GridSearch():
         par_combinations = list(product(*list(self.parameters_grid.values())))
 
         #get the eta
-        self.eta(par_combinations, get_eta)
+        
 
         # If random search is True, it takes n_random random combinations
         if random_search:
@@ -257,6 +261,8 @@ class GridSearch():
 
         elif self.verbose:
             print(f'Grid search of combinations: {len(par_combinations)}')
+
+        self.eta(par_combinations, get_eta)
 
         self.i = 0
 
