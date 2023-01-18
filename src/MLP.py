@@ -122,7 +122,6 @@ class MLP:
         """
         n_epochs = int(n_epochs)
         batch_size = int(batch_size)
-        n_batches = math.ceil(n_samples/batch_size)
         
         input_size = X.shape[1]
         try:
@@ -130,6 +129,7 @@ class MLP:
         except:
             output_size = 1
         n_samples = X.shape[0]
+        n_batches = math.ceil(n_samples/batch_size)
         self.learning_curve = np.zeros(n_epochs)
 
         if input_size != self.input_size or output_size != self.output_size:
