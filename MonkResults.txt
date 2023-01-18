@@ -1,0 +1,19 @@
+**************************************
+Monk Dataset 1
+
+Accuracy on test set 0: 1.0
+
+**************************************
+Monk Dataset 2
+
+Accuracy on test set 1: 1.0
+
+**************************************
+Monk Dataset 3
+
+Accuracy on test set 2: 0.9375
+
+**************************************
+Monk Dataset 3
+
+Accuracy on test set 3: 0.9675925925925926
