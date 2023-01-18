@@ -2,7 +2,7 @@ import numpy as np
 from src.ActivationFunctions import get_activation_instance
 from src.RegularizationFunctions import get_regularization_instance
 from src.Optimizers import HeavyBallGradient
-
+from math import sqrt
 
 class Layer:
 
@@ -86,7 +86,7 @@ class FullyConnectedLayer(Layer):
         self.n_units = n_units
         self.n_inputs_per_unit = n_inputs_per_unit
 
-    def initialize(self, weights_initialization, weights_scale, regularization_function, alpha_l1, alpha_l2, step, momentum, Nesterov):
+    def initialize(self, weights_initialization, weights_scale, weights_mean, regularization_function, alpha_l1, alpha_l2, step, momentum, Nesterov, backprop_variant):
 
         """
         
@@ -97,7 +97,8 @@ class FullyConnectedLayer(Layer):
         ----------
         
         weights_initialization (str): type of initialization for weights
-        weights_scale (int): scale for initialization of weights
+        weights_scale (int): std of the normal distribution for initialization of weights
+        weights_mean (int): mean of the normal distribution for initialization of weights
         regularization_function (RegularizationFunction): regularization function for the layer
         alpha_l1
         alpha_l2
@@ -109,23 +110,33 @@ class FullyConnectedLayer(Layer):
         scale = weights_scale
         # Weight initialization
         if weights_initialization == "scaled":
-            scale = weights_scale
+            self._weights = np.random.normal(loc = weights_mean, scale = weights_scale, size = (self.n_inputs_per_unit, self.n_units))
         elif weights_initialization == "xavier":
-            scale = 1 / self.n_input
+            # 1 / sqrt(n_inputs_per_unit) with numpy
+            bound = 1 / sqrt(self.n_inputs_per_unit)
+            self._weights = np.random.uniform(low = -bound, high = bound, size = (self.n_inputs_per_unit, self.n_units))
+
         elif weights_initialization == "he":
-            scale = 2 / self.n_input
+            bound = 2 / sqrt(self.n_inputs_per_unit)
+            self._weights = np.random.uniform(low = -bound, high = bound, size = (self.n_inputs_per_unit, self.n_units))
         else:
             print("invalid weigths initialization: choose one between 'scaled', 'xavier', 'he' ")
 
-        self._weights = np.random.normal(loc = 0.0, scale = scale, size = (self.n_inputs_per_unit, self.n_units))
+        
         self._biases = np.zeros((1, self.n_units))
 
         #save last weigths and biases update for HBG
         self._last_weights_update = 0
         self._last_biases_update = 0
 
+        self._last_grad_weights = 0
+        self._last_grad_biases = 0
+
         # Optimizer initialization
         self.optimizer = HeavyBallGradient(step, momentum, Nesterov)
+
+        # Backpropagation variant: 'no', 'rprop', 'quickprop'
+        self.backprop_variant = backprop_variant 
 
         # Regularization function
         self.regularization_function = get_regularization_instance(regularization_function, alpha_l1, alpha_l2)
@@ -220,9 +231,14 @@ class FullyConnectedLayer(Layer):
 
         grad_input = np.matmul(grad_output, weights.T)
         grad_weights = np.matmul(self._input.T, grad_output) + self.regularization_function.derivative(weights)
-        grad_biases = grad_output.sum(axis = 0, keepdims = True) 
+        grad_biases = grad_output.sum(axis = 0, keepdims = True)
 
-        weights_update, biases_update = self.optimizer(grad_weights, grad_biases, self._last_weights_update, self._last_biases_update)
+        weights_update, biases_update = self.optimizer(grad_weights, grad_biases, \
+            self._last_weights_update, self._last_biases_update, self.backprop_variant, self._last_grad_weights, self._last_grad_biases)
+
+        if self.backprop_variant == 'quickprop':
+            self._last_grad_weights = grad_weights
+            self._last_grad_biases = grad_biases
 
         self._biases += biases_update
         self._weights += weights_update
@@ -231,7 +247,6 @@ class FullyConnectedLayer(Layer):
         self._last_biases_update = biases_update
 
         return grad_input
-
 
 
 
@@ -279,7 +294,7 @@ class ActivationLayer(Layer):
 
         return self.activation(input)
 
-    def backprop(self, grad_output):
+    def backprop(self, grad_output, NLL_simplify=False):
         
         """
         
@@ -295,8 +310,10 @@ class ActivationLayer(Layer):
 
         """
 
-
-        return grad_output * self.activation.derivative(self._input)
+        if NLL_simplify:
+            return grad_output * self.activation.derivative(self._input, NLL_simplify)
+        else:
+            return grad_output * self.activation.derivative(self._input)
 
 
 
@@ -324,7 +341,7 @@ class Dense(Layer):
         self._fully_connected_layer = FullyConnectedLayer(n_units, n_inputs_per_unit)
         self._activation_layer = ActivationLayer(activation)
 
-    def initialize(self, weights_initialization, weights_scale, regularization, alpha_l1, alpha_l2, step, momentum, Nesterov):
+    def initialize(self, weights_initialization, weights_scale, weights_mean, regularization, alpha_l1, alpha_l2, step, momentum, Nesterov, backprop_variant):
 
         """
         
@@ -344,7 +361,7 @@ class Dense(Layer):
 
         """
 
-        self._fully_connected_layer.initialize(weights_initialization, weights_scale, regularization, alpha_l1, alpha_l2, step, momentum, Nesterov)
+        self._fully_connected_layer.initialize(weights_initialization, weights_scale, weights_mean, regularization, alpha_l1, alpha_l2, step, momentum, Nesterov, backprop_variant)
 
     def get_params(self):
 
@@ -401,7 +418,7 @@ class Dense(Layer):
         return self._activation_layer.forwardprop(output_FCL)
 
 
-    def backprop (self, grad_output):
+    def backprop (self, grad_output, NLL_simplify=False):
 
         """
         
@@ -420,6 +437,7 @@ class Dense(Layer):
 
         """
 
-        grad_output_FCL = self._activation_layer.backprop(grad_output)
+        grad_output_FCL = self._activation_layer.backprop(grad_output, NLL_simplify)
+
         return self._fully_connected_layer.backprop(grad_output_FCL)
 

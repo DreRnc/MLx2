@@ -3,8 +3,9 @@ import math
 from sklearn.model_selection import train_test_split
 
 from src.Layers import Layer, FullyConnectedLayer, Dense
-from src.MetricFunctions import get_metric_instance
+from src.MetricFunctions import NLL, get_metric_instance
 from src.EarlyStopping import EarlyStopping
+from src.ActivationFunctions import SoftMax
 
 class MLP:
 
@@ -54,7 +55,7 @@ class MLP:
             if l < n_layers:
                 new_layer = Dense(layer_units[l], layer_units[l-1], activation_function)
             elif self.task == 'classification': 
-                new_layer = Dense(layer_units[l], layer_units[l-1], "sigmoid")
+                new_layer = Dense(layer_units[l], layer_units[l-1], "softmax")
             # self.task == 'multiple output classification':
             #    new_layer = Dense(layer_units[l], layer_units[l-1], "softmax")
             else:
@@ -89,8 +90,8 @@ class MLP:
         return self._eval_metric(y_true, y_pred)
 
     def fit(self, X, y_true, n_epochs, batch_size, X_test = None, y_test = None, error = "MSE", regularization = "no", \
-        alpha_l1 = 0, alpha_l2 = 0, weights_initialization = "scaled", weights_scale = 0.1, step = 0.1, momentum = 0, Nesterov = False, \
-        early_stopping = False, patience = 10, tolerance = 0.01, validation_split_ratio = 0.1, verbose = False):
+        alpha_l1 = 0, alpha_l2 = 0, weights_initialization = "scaled", weights_scale = 0.1, weights_mean = 0, step = 0.1, momentum = 0, Nesterov = False, backprop_variant = 'no', \
+        early_stopping = None, validation_split_ratio = 0.1, verbose = False, patience = 10, tolerance = 0.01):
 
         """
 
@@ -113,24 +114,32 @@ class MLP:
         momentum (float) : 
         early_stopping (bool) :
         validation_split_ratio (float) :
-
+        verbose (bool) :
+        patience (int) :
+        tolerance (float) :
+        scale (float) :
+        mean (float) : 
         """
         n_epochs = int(n_epochs)
         batch_size = int(batch_size)
         input_size = X.shape[1]
-        output_size = y_true.shape[1]
+        try:
+            output_size = y_true.shape[1]
+        except:
+            output_size = 1
         n_samples = X.shape[0]
         self.learning_curve = np.zeros(n_epochs)
 
         if input_size != self.input_size or output_size != self.output_size:
             raise Exception("Dimension Error!")
 
+
         training_set = np.concatenate((X, y_true), axis = 1)
 
         n_batches = math.ceil(n_samples/batch_size)
 
         for layer in self.layers:
-            layer.initialize(weights_initialization, weights_scale, regularization, alpha_l1, alpha_l2, step, momentum, Nesterov)
+            layer.initialize(weights_initialization, weights_scale, weights_mean, regularization, alpha_l1, alpha_l2, step, momentum, Nesterov, backprop_variant)
 
         error_function = get_metric_instance(error)
 
@@ -167,7 +176,9 @@ class MLP:
                 
                 for layer in reversed(self.layers):
 
-                    grad_inputs = layer.backprop(grad_outputs)
+                    NLL_simplify=isinstance(error_function, NLL) and isinstance(layer._activation_layer.activation, SoftMax)
+
+                    grad_inputs = layer.backprop(grad_outputs, NLL_simplify)
                     grad_outputs = grad_inputs
             
             if early_stopping:
