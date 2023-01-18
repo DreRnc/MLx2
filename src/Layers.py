@@ -202,7 +202,7 @@ class FullyConnectedLayer(Layer):
 
 
 
-    def backprop(self, grad_output):
+    def backprop(self, grad_output, NLL_simplify = False):
         
 
         """
