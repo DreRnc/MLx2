@@ -3,9 +3,8 @@ import math
 from sklearn.model_selection import train_test_split
 
 from src.Layers import Layer, FullyConnectedLayer, Dense
-from src.MetricFunctions import NLL, get_metric_instance
+from src.MetricFunctions import get_metric_instance, MetricFunction
 from src.EarlyStopping import EarlyStopping
-from src.ActivationFunctions import SoftMax
 
 class MLP:
 
@@ -58,8 +57,6 @@ class MLP:
                 new_layer = Dense(layer_units[l], layer_units[l-1], activation_function)
             elif self.task == 'classification': 
                 new_layer = Dense(layer_units[l], layer_units[l-1], "sigmoid")
-            # self.task == 'multiple output classification':
-            #    new_layer = Dense(layer_units[l], layer_units[l-1], "softmax")
             else:
                 new_layer = FullyConnectedLayer(layer_units[l], layer_units[l-1])
                 
@@ -79,19 +76,22 @@ class MLP:
 
         """
         if metric != 'generic':
-            self._eval_metric = metric
-        elif self.task == 'regression':
-            self._eval_metric = 'MSE'
-        elif self.task == 'classification':
-            self._eval_metric = 'accuracy'
-        
-        self._eval_metric = get_metric_instance(self._eval_metric)
+            eval_metric = metric
+            eval_metric = get_metric_instance(eval_metric)
+        elif type(metric) != str:
+            if issubclass(MetricFunction, self._eval_metric):
+                eval_metric = self._eval_metric
+        else:
+            if self.task == "classification":
+                eval_metric = get_metric_instance('acc')
+            else:
+                eval_metric = get_metric_instance('mse')
 
         y_pred = self.predict(X)
 
-        return self._eval_metric(y_true, y_pred)
+        return eval_metric(y_true, y_pred)
 
-    def fit(self, X, y_true, n_epochs, batch_size, X_test = None, y_test = None, error = "MSE", regularization = "elastic", \
+    def fit(self, X, y_true, n_epochs, batch_size, X_test = None, y_test = None, error = "MSE", eval_metric = "default", regularization = "no", \
         alpha_l1 = 0, alpha_l2 = 0, weights_initialization = "scaled", weights_scale = 0.01, weights_mean = 0, step = 0.1, momentum = 0, Nesterov = False, backprop_variant = 'no', \
         early_stopping = True, validation_split_ratio = 0.1, random_seed = 0, verbose = False, patience = 10, tolerance = 0.01):
 
@@ -124,6 +124,11 @@ class MLP:
         """
         n_epochs = int(n_epochs)
         batch_size = int(batch_size)
+
+        if eval_metric == "default":
+            self._eval_metric = get_metric_instance(error)
+        else:
+            self._eval_metric = get_metric_instance(eval_metric)
         
         input_size = X.shape[1]
         try:
@@ -145,10 +150,7 @@ class MLP:
 
         # Initializes EarlyStopping
         if early_stopping:
-            if self.task == "classification":
-                early_stopping = EarlyStopping(patience = patience, tolerance = tolerance, metric = "accuracy", mode = "max")
-            if self.task == "regression":
-                early_stopping = EarlyStopping(patience = patience, tolerance = tolerance, metric = error, mode = "min")
+            early_stopping = EarlyStopping(patience = patience, tolerance = tolerance, metric = self._eval_metric)
             early_stopping.initialize()
             X, X_test, y_true, y_test = train_test_split(X, y_true, test_size = validation_split_ratio, shuffle = True, random_state = random_seed)
         
@@ -179,9 +181,7 @@ class MLP:
                 
                 for layer in reversed(self.layers):
 
-                    NLL_simplify = isinstance(error_function, NLL) and isinstance(layer._activation_layer.activation, SoftMax)
-
-                    grad_inputs = layer.backprop(grad_outputs, NLL_simplify)
+                    grad_inputs = layer.backprop(grad_outputs)
                     grad_outputs = grad_inputs
             
             if early_stopping:
@@ -204,14 +204,14 @@ class MLP:
             y_pred = self.predict(X)
 
             if self.task == "regression":
-                self.learning_curve[epoch] = (error_function(y_true, y_pred))
+                self.learning_curve[epoch] = (self._eval_metric(y_true, y_pred))
                 if verbose:
-                    print("Epoch " + str(epoch) + ": " + error + " = " + str(error_function(y_true, y_pred)))
+                    print("Epoch " + str(epoch) + ": " + error + " = " + str(self._eval_metric(y_true, y_pred)))
 
             if self.task == "classification":
-                self.learning_curve[epoch] = (get_metric_instance('acc')(y_true, y_pred))
+                self.learning_curve[epoch] = (self._eval_metric(y_true, y_pred))
                 if verbose:
-                    print("Epoch " + str(epoch) + ": " + "accuracy" + " = " + str(get_metric_instance("accuracy")(y_true, y_pred)))
+                    print("Epoch " + str(epoch) + ": " + "accuracy" + " = " + str(self._eval_metric(y_true, y_pred)))
 
 
     def predict(self, X):

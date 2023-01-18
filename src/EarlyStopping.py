@@ -1,10 +1,10 @@
 import numpy as np
-from src.MetricFunctions import MetricFunction, get_metric_instance
+from src.MetricFunctions import MetricFunction, get_metric_instance, Accuracy
 
 
 class EarlyStopping():
 
-    def __init__ (self,  patience, tolerance, metric = "loss", mode = "min"):
+    def __init__ (self,  patience, tolerance, metric = "loss"):
 
         """
         Initialize EarlyStopping Object
@@ -31,9 +31,10 @@ class EarlyStopping():
         self.patience = patience
         self.tolerance = tolerance
 
-        if mode not in ["max", "min"]:
-            raise ValueError("The mode must be either 'max' or 'min'.")
-        self.mode = mode
+        if issubclass(Accuracy, self.metric):
+            self.mode = "max"
+        else:
+            self.mode = "min"
 
     def initialize (self):
 
