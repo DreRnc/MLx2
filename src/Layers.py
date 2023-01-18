@@ -108,6 +108,7 @@ class FullyConnectedLayer(Layer):
 
         """
         scale = weights_scale
+        
         # Weight initialization
         if weights_initialization == "scaled":
             self._weights = np.random.normal(loc = weights_mean, scale = weights_scale, size = (self.n_inputs_per_unit, self.n_units))
