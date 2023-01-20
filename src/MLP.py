@@ -56,7 +56,7 @@ class MLP:
             if l < n_layers:
                 new_layer = Dense(layer_units[l], layer_units[l-1], activation_function)
             elif self.task == 'classification': 
-                new_layer = Dense(layer_units[l], layer_units[l-1], "sigmoid")
+                new_layer = Dense(layer_units[l], layer_units[l-1], "tanh")
             else:
                 new_layer = FullyConnectedLayer(layer_units[l], layer_units[l-1])
                 

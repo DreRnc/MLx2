@@ -114,11 +114,11 @@ class FullyConnectedLayer(Layer):
             self._weights = np.random.normal(loc = weights_mean, scale = weights_scale, size = (self.n_inputs_per_unit, self.n_units))
         elif weights_initialization == "xavier":
             # 1 / sqrt(n_inputs_per_unit) with numpy
-            bound = 1 / sqrt(self.n_inputs_per_unit)
+            bound = 1 / self.n_inputs_per_unit
             self._weights = np.random.uniform(low = -bound, high = bound, size = (self.n_inputs_per_unit, self.n_units))
 
         elif weights_initialization == "he":
-            bound = 2 / sqrt(self.n_inputs_per_unit)
+            bound = 2 / self.n_inputs_per_unit
             self._weights = np.random.uniform(low = -bound, high = bound, size = (self.n_inputs_per_unit, self.n_units))
         else:
             print("invalid weigths initialization: choose one between 'scaled', 'xavier', 'he' ")

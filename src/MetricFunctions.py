@@ -38,7 +38,14 @@ class Accuracy(MetricFunction):
             y_true = np.argmax(y_true, axis=1)
             y_pred = np.argmax(y_pred, axis=1)
         else: #for the case of binary classification
-            y_pred = np.round(y_pred)
+
+            # if sigmoid
+            # y_pred = np.round(y_pred)
+
+            # if tanh
+            y_pred[y_pred >= 0] = 1
+            y_pred[y_pred < 0] = -1
+            
         return np.mean(y_true == y_pred)
 
 class ErrorFunction(MetricFunction):
