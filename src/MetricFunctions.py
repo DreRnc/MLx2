@@ -38,7 +38,14 @@ class Accuracy(MetricFunction):
             y_true = np.argmax(y_true, axis=1)
             y_pred = np.argmax(y_pred, axis=1)
         else: #for the case of binary classification
-            y_pred = np.round(y_pred)
+
+            # if sigmoid
+            # y_pred = np.round(y_pred)
+
+            # if tanh
+            y_pred[y_pred >= 0] = 1
+            y_pred[y_pred < 0] = -1
+            
         return np.mean(y_true == y_pred)
 
 class ErrorFunction(MetricFunction):
@@ -113,52 +120,6 @@ class MAE(ErrorFunction):
             raise ValueError("inputs must have the same shape")
         return np.sign(y_pred-y_true)/(y_true.shape[0]*y_true.shape[1])
 
-
-class NLL(ErrorFunction):
-    '''
-    Computes the negative log likelihood between two np.arrays of all sizes.
-
-    Methods:
-        __call__(self,y_true, y_pred): Returns the mean absolute error
-            Input: 2 np.arrays of the same shape. In the case of more than one output the array must have the shape (n_samples, n_classes)
-                y_true: np.array of the true class (one hot vector with 1 in the right class)
-                y_pred: np.array of the predicted values (softmax distribution over the classes)
-            Output: Float
-        derivative(self,y_true, y_pred): Returns the derivative of negative log likelihood
-            Input: 2 np.arrays of the same shape
-            Output: np.array
-
-    '''
-
-    def __call__(self, y_true, y_pred):
-        if y_true.shape != y_pred.shape:
-            raise ValueError("inputs must have the same shape")
-            
-        # Calculate the negative log likelihood
-        loss = -np.sum(y_true * np.log(y_pred) + (1 - y_true) * np.log(1 - y_pred))
-
-        # Average the loss across the batch
-        return loss / y_true.shape[0]
-
-    def derivative(self, y_true, y_pred):
-
-        # This is actually directly with respect to the weight of last layer, not to predicted probability.
-
-        """
-        Questo è sbagliato perchè è direttamente rispetto ai weights,
-        mentre l'ultimo layer poi farà anche la derivata del sigmoid
-        """
-        
-        # That is, with respect to z, not p=sigmoid(z)
-        
-        if y_true.shape != y_pred.shape:
-            raise ValueError("inputs must have the same shape")
-
-        # Average the gradient across the batch
-        
-        return (y_pred - y_true) /  y_true.shape[0]
-
-
 def get_metric_instance(metric):
     '''
     Returns the metric function indicated in the input if present
@@ -172,11 +133,5 @@ def get_metric_instance(metric):
         return MAE()
     elif metric in ["Accuracy", "accuracy", "acc", "ACC", "ACCURACY",'a']:
         return Accuracy()
-    elif metric in ["Negative Log Likelihood", "NLL"]:
-        return NLL()
     else:
         raise ValueError("Metric function not found")
-
-
-
-

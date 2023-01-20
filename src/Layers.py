@@ -107,21 +107,17 @@ class FullyConnectedLayer(Layer):
         Nesterov
 
         """
-        scale = weights_scale
+        
         # Weight initialization
         if weights_initialization == "scaled":
-            self._weights = np.random.normal(loc = weights_mean, scale = weights_scale, size = (self.n_inputs_per_unit, self.n_units))
+            scale = weights_scale
         elif weights_initialization == "xavier":
-            # 1 / sqrt(n_inputs_per_unit) with numpy
-            bound = 1 / sqrt(self.n_inputs_per_unit)
-            self._weights = np.random.uniform(low = -bound, high = bound, size = (self.n_inputs_per_unit, self.n_units))
-
+            scale = 1 / self.n_inputs_per_unit
         elif weights_initialization == "he":
-            bound = 2 / sqrt(self.n_inputs_per_unit)
-            self._weights = np.random.uniform(low = -bound, high = bound, size = (self.n_inputs_per_unit, self.n_units))
+            scale = 2 / self.n_inputs_per_unit
         else:
             print("invalid weigths initialization: choose one between 'scaled', 'xavier', 'he' ")
-
+        self._weights = np.random.normal(loc = weights_mean, scale = scale, size = (self.n_inputs_per_unit, self.n_units))
         
         self._biases = np.zeros((1, self.n_units))
 
@@ -202,7 +198,7 @@ class FullyConnectedLayer(Layer):
 
 
 
-    def backprop(self, grad_output, NLL_simplify = False):
+    def backprop(self, grad_output):
         
 
         """
@@ -294,7 +290,7 @@ class ActivationLayer(Layer):
 
         return self.activation(input)
 
-    def backprop(self, grad_output, NLL_simplify=False):
+    def backprop(self, grad_output):
         
         """
         
@@ -310,10 +306,7 @@ class ActivationLayer(Layer):
 
         """
 
-        if NLL_simplify:
-            return grad_output * self.activation.derivative(self._input, NLL_simplify)
-        else:
-            return grad_output * self.activation.derivative(self._input)
+        return grad_output * self.activation.derivative(self._input)
 
 
 
@@ -418,7 +411,7 @@ class Dense(Layer):
         return self._activation_layer.forwardprop(output_FCL)
 
 
-    def backprop (self, grad_output, NLL_simplify=False):
+    def backprop (self, grad_output):
 
         """
         
@@ -437,7 +430,7 @@ class Dense(Layer):
 
         """
 
-        grad_output_FCL = self._activation_layer.backprop(grad_output, NLL_simplify)
+        grad_output_FCL = self._activation_layer.backprop(grad_output)
 
         return self._fully_connected_layer.backprop(grad_output_FCL)
 
