@@ -44,7 +44,8 @@ class MLP:
         self.input_size = input_size
         self.output_size = output_size
         self.task = task
-
+        self.hidden_layer_units = hidden_layer_units
+        self.activation_function = activation_function
         layer_units = [input_size] + hidden_layer_units + [output_size]
         
         n_layers = len(layer_units) - 1 
@@ -63,6 +64,24 @@ class MLP:
                 
             
             self.layers.append(new_layer)
+
+
+    def get_model_par(self):
+        """
+        Returns model parameters (weights and biases)
+        """
+        model_par = []
+        for layer in self.layers:
+            model_par.append(layer.get_params())
+        return model_par
+    
+    def set_model_par(self, model_par):
+        """
+        Sets model parameters (weights and biases)
+        """
+        for layer, layer_params in zip(self.layers, model_par):
+            layer.set_params(layer_params)
+
 
     def evaluate_model(self, X, y_true, metric = 'generic'):
         """
@@ -89,9 +108,10 @@ class MLP:
 
         return self._eval_metric(y_true, y_pred)
 
-    def fit(self, X, y_true, n_epochs, batch_size, X_test = None, y_test = None, error = "MSE", regularization = "elastic", \
-        alpha_l1 = 0, alpha_l2 = 0, weights_initialization = "scaled", weights_scale = 0.1, weights_mean = 0, step = 0.1, momentum = 0, Nesterov = False, backprop_variant = 'no', \
-        early_stopping = True, validation_split_ratio = 0.1, verbose = False, patience = 10, tolerance = 0.01):
+    def fit(self, X, y_true, n_epochs = 3000, batch_size = 256, X_test = None, y_test = None, error = "MSE", regularization = "elastic", 
+        alpha_l1 = 0, alpha_l2 = 0, weights_initialization = "scaled", weights_scale = 0.1, weights_mean = 0, step = 0.1, momentum = 0, 
+        Nesterov = False, backprop_variant = 'no', early_stopping = True, validation_split_ratio = 0.1, verbose = False, patience = 50, 
+        tolerance = 0.00001):
 
         """
 
@@ -149,7 +169,10 @@ class MLP:
             if self.task == "regression":
                 early_stopping = EarlyStopping(patience = patience, tolerance = tolerance, metric = error, mode = "min")
             early_stopping.initialize()
-            X, X_test, y_true, y_test = train_test_split(X, y_true, test_size = validation_split_ratio, shuffle = True)
+            X, X_test, y_true, y_test = train_test_split(X, y_true, test_size = validation_split_ratio, shuffle = True, random_state = 0)
+        
+        elif validation_split_ratio > 0:
+            X, X_test, y_true, y_test = train_test_split(X, y_true, test_size = validation_split_ratio, shuffle = True, random_state = 0)
         
         # training_set = np.concatenate((X, y_true), axis = 1)
         n_batches = math.ceil(X.shape[0]/batch_size)
@@ -195,10 +218,12 @@ class MLP:
 
                 if stop:
                     print(f"Early stopped training on epoch {epoch}")
-                    best_params = early_stopping._best_params
-                    for layer, layer_best_params in zip(self.layers, best_params):
-                        layer.set_params(layer_best_params)
                     break
+
+            elif X_test is not None:
+                y_pred_test = self.predict(X_test)
+                test_loss = error_function(y_test, y_pred_test)
+                self.validation_curve[epoch] = test_loss
 
             y_pred = self.predict(X)
 
@@ -212,6 +237,13 @@ class MLP:
                 if verbose:
                     print("Epoch " + str(epoch) + ": " + "accuracy" + " = " + str(get_metric_instance("accuracy")(y_true, y_pred)))
 
+        best_params = early_stopping._best_params
+        self.best_epoch = early_stopping._best_epoch
+
+        for layer, layer_best_params in zip(self.layers, best_params):
+            layer.set_params(layer_best_params)
+        
+        print(f'best epoch was {early_stopping._best_epoch}')
 
     def predict(self, X):
 

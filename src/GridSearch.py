@@ -8,6 +8,57 @@ import time
 import numpy as np
 from tqdm import tqdm
 from sklearn.gaussian_process import GaussianProcessRegressor
+import random
+import json
+import os
+
+
+def print_grid_results(path, k_fold = True, task = 'regression', n_results = 1):
+
+    results = np.load(path, allow_pickle = True)
+
+    results = results.tolist()
+
+    if task == 'regression':
+        results.sort(key = lambda x: x[0])
+    elif task == 'classification':
+        results.sort(key = lambda x: x[0], reverse = True)
+
+    if k_fold == True:
+        # find the model with lowest highest score_list
+        best_score_list = [i[2] for i in results]
+        best_score_par = [i[1] for i in results]
+        best_score_loss = [i[0] for i in results]
+        # find highest value for every list
+        best_score_list_max = [max(i) for i in best_score_list]
+        # find the index of the lowest value
+        index = best_score_list_max.index(min(best_score_list_max))
+
+        low_max_loss = best_score_loss[index]
+        low_max_score_list = best_score_list[index]
+        low_max_parameters = best_score_par[index]
+
+
+    print('\n')
+    print(f'Best parameters: {results[0][1]}')
+    print(f'Best score: {results[0][0]}')
+    if k_fold == True:
+        print('scores', results[0][2])
+        print(f'Lowest max score: {low_max_loss}')
+        print('Max score = ', best_score_list_max[index])
+        print(f'Lowest max score list: {low_max_score_list}')
+        print(f'Lowest max parameters: {low_max_parameters}')
+    
+    if n_results > 1:
+        for i in range(1, n_results):
+            print('\n')
+            print(f'Best {i+1} parameters: {results[i][1]}')
+            print(f'Best {i+1} score: {results[i][0]}')
+
+
+
+        
+
 
 
 class GridSearch():
@@ -71,7 +122,12 @@ class GridSearch():
         if self.n_folds < 2:
             self.model.fit(self.X_train, self.y_train, **parameters)
             score = self.model.evaluate_model(self.X_val, self.y_val)
+
+
+            return score / self.n_folds, parameters
+        
         else:
+            score_list = []
             current_fold = 1
             score = 0
             for train_index, val_index in self.folds:
@@ -79,20 +135,19 @@ class GridSearch():
                 y_train, y_val = self.y[train_index], self.y[val_index]
 
                 self.model.fit(X_train, y_train, **parameters)
+                sc = self.model.evaluate_model(X_val, y_val)
+                
+                score += sc
+                score_list.append(sc)
 
-                score += self.model.evaluate_model(X_val, y_val)
+
                 #del(self.model)
                 current_fold += 1
 
-        self.i = self.i + 1
 
-        if self.verbose:
-            print('-----------------------------------')
-            print(f'Combination {self.i}/{l}')        
-            print(f'Parameters: {parameters}')
-            print(f'Validation score: {score/self.n_folds}')
-        
-        return score / self.n_folds, parameters
+            return score / self.n_folds, parameters, score_list
+
+      
         
 
     def create_folds(self, n_folds, stratified):
@@ -117,15 +172,15 @@ class GridSearch():
 
         if n_folds < 2:
             if stratified:
-                self.X_train, self.X_val, self.y_train, self.y_val = train_test_split(self.X, self.y, test_size = self.test_size, stratify = self.y)
+                self.X_train, self.X_val, self.y_train, self.y_val = train_test_split(self.X, self.y, test_size = self.test_size, stratify = self.y, random_state = 42)
             else:
-                self.X_train, self.X_val, self.y_train, self.y_val = train_test_split(self.X, self.y, test_size = self.test_size)
+                self.X_train, self.X_val, self.y_train, self.y_val = train_test_split(self.X, self.y, test_size = self.test_size, random_state = 42)
 
         elif stratified: 
-            cv = StratifiedKFold(n_splits = n_folds)
+            cv = StratifiedKFold(n_splits = n_folds, shuffle = True,random_state = 42)
             self.folds = list(cv.split(self.X, self.y))
         else:
-            cv = KFold(n_splits = n_folds)
+            cv = KFold(n_splits = n_folds, shuffle = True, random_state = 42)
             self.folds = list(cv.split(self.X, self.y))
 
     def eta(self, par_combinations, get_eta):
@@ -137,7 +192,7 @@ class GridSearch():
         par_combinations (List): The combinations of parameters to be tested
         get_eta (Bool): If True the eta is computed
         '''
-        num_of_iter = 260
+        num_of_iter = 50
         
         if get_eta:
             print('Computing ETA')
@@ -152,7 +207,7 @@ class GridSearch():
                     futures = [executor.submit(self.compute, values, len(eta_combinations)) for values in eta_combinations]
 
                     concurrent.futures.wait(futures)
-                    #self.i = 0
+
                 end = time.time()
                 eta = (end - start) * len(par_combinations) / num_of_iter
                 # get the time in hours
@@ -163,25 +218,69 @@ class GridSearch():
         '''
         This method is used to clean the output of the grid search
         '''
-
-        self.results = [ [self.scores[i], self.par[i]] for i in range(len(self.scores)) ]
+        if self.n_folds > 1:
+            self.results = [ [self.scores[i], self.par[i], self.scores_list[i]] for i in range(len(self.scores)) ]
+        else:
+            self.results = [ [self.scores[i], self.par[i]] for i in range(len(self.scores)) ]
 
         if self.model.task == 'regression':
             self.results.sort(key = lambda x: x[0])
         elif self.model.task == 'classification':
             self.results.sort(key = lambda x: x[0], reverse = True)
         
-        if self.verbose:
-            print('\n')
-            print(f'Best parameters: {self.results[0][1]}')
-            print(f'Best score: {self.results[0][0]}')
+        if self.n_folds > 1:
+            # find the model with lowest highest score_list
+            best_score_list = [i[2] for i in self.results]
+            best_score_par = [i[1] for i in self.results]
+            best_score_loss = [i[0] for i in self.results]
+            # find highest value for every list
+            best_score_list_max = [max(i) for i in best_score_list]
+            # find the index of the lowest value
+            index = best_score_list_max.index(min(best_score_list_max))
 
+            self.low_max_loss = best_score_loss[index]
+            self.low_max_score_list = best_score_list[index]
+            self.low_max_parameters = best_score_par[index]
+
+        print('\n')
+        print(f'Best parameters: {self.results[0][1]}')
+        print(f'Best score: {self.results[0][0]}')
+        if self.n_folds > 1:
+            print('scores', self.results[0][2])
+            print(f'Lowest max score: {self.low_max_loss}')
+            print('Max score = ', best_score_list_max[index])
+            print(f'Lowest max score list: {self.low_max_score_list}')
+            print(f'Lowest max parameters: {self.low_max_parameters}')
+        
 
         self.best_parameters = self.results[0][1]
         self.best_score = self.results[0][0]
+        if self.n_folds > 1:
+            self.best_scores_list = self.results[0][2]
+
 
         self.model.fit(self.X, self.y, **self.best_parameters)
         self.best_model = self.model
+
+
+        if not os.path.exists('grid_results'):
+            os.makedirs('grid_results')
+
+        # get time
+        import datetime
+        now = datetime.datetime.now()
+        rand_int = str(now)
+        # format rand_int
+        rand_int = rand_int.replace(':', '_')
+        rand_int = rand_int.replace('.', '_')
+
+
+        with open(f'grid_results/{rand_int}_grid_results{self.model.hidden_layer_units}_{self.model.activation_function}.txt', 'w') as f:
+            json.dump(self.parameters_grid, f)
+
+        np.save(f'grid_results/{rand_int}_grid_results{self.model.hidden_layer_units}_{self.model.activation_function}.npy', self.results)
+
+        
 
     def grid_search(self, par_combinations):
         '''
@@ -203,15 +302,20 @@ class GridSearch():
                 for future in concurrent.futures.as_completed(futures):
                     self.scores.append(future.result()[0])
                     self.par.append(future.result()[1])
+                    if self.n_folds > 1:
+                        self.scores_list.append(future.result()[2])
         else:
             print('Parallelisation not active')
             for values in tqdm(par_combinations):
                 out = self.compute(values, len(par_combinations))
                 self.scores.append(out[0])
                 self.par.append(out[1])
+                if self.n_folds > 1:
+                        self.scores_list.append(future.result()[2])
 
 
-    def fit(self, X, y, parameters_grid, n_folds = 1, stratified = False, test_size = 0.2, verbose = True, parallel = False, random_search = False, n_random = 10, get_eta = False):
+    def fit(self, X, y, parameters_grid, n_folds = 1, stratified = False, test_size = 0.2, verbose = True, parallel = False, 
+        random_search = False, n_random = 10, get_eta = False):
         
         '''
         Performs the grid search
@@ -236,12 +340,13 @@ class GridSearch():
         self.n_folds = n_folds
         self.scores = []
         self.par = []
+        self.scores_list = []
         self.X = X
         self.y = y
         self.parameters_grid = parameters_grid
         self.test_size = test_size
         self.parallel = parallel
-        
+
 
         # Creates the folds
         self.create_folds(n_folds, stratified)
@@ -259,14 +364,18 @@ class GridSearch():
             if self.verbose:
                 print(f'Random search of: {n_random} combinations')
 
+
         elif self.verbose:
             print(f'Grid search of combinations: {len(par_combinations)}')
 
+
         self.eta(par_combinations, get_eta)
 
-        self.i = 0
+
+
 
         self.grid_search(par_combinations)
+
 
         self.clean_output()
 
