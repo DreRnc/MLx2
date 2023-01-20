@@ -45,7 +45,7 @@ class Accuracy(MetricFunction):
             # if tanh
             y_pred[y_pred >= 0] = 1
             y_pred[y_pred < 0] = -1
-            
+
         return np.mean(y_true == y_pred)
 
 class ErrorFunction(MetricFunction):
@@ -90,7 +90,7 @@ class MSE(ErrorFunction):
     def derivative(self, y_true, y_pred):
         if y_true.shape != y_pred.shape:
             raise ValueError("inputs must have the same shape")
-        #we are deviding by the number of samples since we are using the mean of th gradients in a batch and not the sum
+        #we are deviding by the number of samples since we are using the mean of the gradients in a batch and not the sum
         # we are also not multiplying by 2 to simplify the backpropagation
 
         return (y_pred - y_true) / y_true.shape[0]
