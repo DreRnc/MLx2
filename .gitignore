@@ -10,6 +10,9 @@ src/__pycache__/Optimizers.cpython-310.pyc
 src/__pycache__/RegularizationFunctions.cpython-310.pyc
 data/__pycache__/load_data.cpython-310.pyc
 svm.ipynb
-Experiments.ipynb
+ExperimentsTests.ipynb
+Experiments_Def.ipynb
 benchmark.ipynb
 main.ipynb
+results/Combinations.txt
+results/MonkResultsAll.txt
