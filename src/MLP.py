@@ -43,6 +43,9 @@ class MLP:
         self.input_size = input_size
         self.output_size = output_size
         self.task = task
+        
+        self.hidden_layer_units = hidden_layer_units
+        self.activation_function = activation_function
 
         layer_units = [input_size] + hidden_layer_units + [output_size]
         
@@ -142,6 +145,8 @@ class MLP:
         self.learning_accuracy_curve = np.zeros(n_epochs)
         self.test_accuracy_curve = np.zeros(n_epochs)
 
+        
+
         if input_size != self.input_size or output_size != self.output_size:
             raise Exception("Dimension Error!")
 
@@ -202,6 +207,7 @@ class MLP:
 
                 if stop:
                     print(f"Early stopped training on epoch {epoch}")
+                    print(f'Best epoch was {early_stopping._best_epoch}')
                     best_params = early_stopping._best_params
                     for layer, layer_best_params in zip(self.layers, best_params):
                         layer.set_params(layer_best_params)
@@ -248,3 +254,132 @@ class MLP:
         y_pred = layer.output
 
         return y_pred
+    
+class RandomizedMLP(MLP):
+
+    def fit(self, X, y_true, n_epochs, batch_size, X_test = None, y_test = None, error = "MSE", eval_metric = "default", regularization = "no", \
+        alpha_l1 = 0, alpha_l2 = 0, weights_initialization = "scaled", weights_scale = 0.01, weights_mean = 0, step = 0.1, momentum = 0, Nesterov = False, backprop_variant = 'no', \
+        early_stopping = True, validation_split_ratio = 0.1, random_seed = 0, verbose = False, patience = 10, tolerance = 0.01):
+
+        """
+
+        Fits the weigths and biases of the MLP 
+
+        Parameters
+        -----------
+        X (n_samples x n_inputs) : 
+        y_true (n_samples x n_output) : 
+
+        n_epochs (int) :
+        batch_size (int) :
+        error (str) :
+        regularization (str) :
+        alpha_l1 (float) :
+        alpha_l2 (float) : 
+        initialization (str) : 
+        weights_scale (float): 
+        step (float) : 
+        momentum (float) : 
+        early_stopping (bool) :
+        validation_split_ratio (float) :
+        verbose (bool) :
+        patience (int) :
+        tolerance (float) :
+        scale (float) :
+        mean (float) : 
+        """
+        n_epochs = int(n_epochs)
+        batch_size = int(batch_size)
+
+        if eval_metric == "default":
+            self._eval_metric = get_metric_instance(error)
+        else:
+            self._eval_metric = get_metric_instance(eval_metric)
+        
+        input_size = X.shape[1]
+        try:
+            output_size = y_true.shape[1]
+        except:
+            output_size = 1
+        n_samples = X.shape[0]
+        n_batches = math.ceil(n_samples/batch_size)
+        self.learning_curve = np.zeros(n_epochs)
+        self.validation_curve = np.zeros(n_epochs)
+        self.learning_accuracy_curve = np.zeros(n_epochs)
+        self.test_accuracy_curve = np.zeros(n_epochs)
+
+        
+
+        if input_size != self.input_size or output_size != self.output_size:
+            raise Exception("Dimension Error!")
+
+        for layer in self.layers:
+            layer.initialize(weights_initialization, weights_scale, weights_mean, regularization, alpha_l1, alpha_l2, step, momentum, Nesterov, backprop_variant)
+
+        error_function = get_metric_instance(error)
+
+        # Initializes EarlyStopping
+        if early_stopping:
+            early_stopping = EarlyStopping(patience = patience, tolerance = tolerance, metric = self._eval_metric)
+            early_stopping.initialize()
+            X, X_test, y_true, y_test = train_test_split(X, y_true, test_size = validation_split_ratio, shuffle = True, random_state = random_seed)
+        
+        # training_set = np.concatenate((X, y_true), axis = 1)
+        n_batches = math.ceil(X.shape[0]/batch_size)
+        
+        # Training
+        
+        for epoch in range(n_epochs):
+
+            # np.random.shuffle(training_set)
+            
+            # TR = np.split(training_set, [input_size], axis = 1)
+            # X = TR[0]
+            # y_true = TR[1]
+
+            X_batches = np.split(X, range(batch_size, X.shape[0], batch_size), axis = 0)
+            y_true_batches = np.split(y_true, range(batch_size, y_true.shape[0], batch_size), axis= 0)
+
+            for batch in range(n_batches):
+
+                X_batch = X_batches[batch]
+                y_true_batch = y_true_batches[batch]
+
+                y_pred_batch = self.predict(X_batch)
+                
+                grad_outputs = error_function.derivative(y_true_batch, y_pred_batch)
+                
+                # only do back prop for last layer
+                self.layers[-1].backprop(grad_outputs)
+            
+            # Validation/Test Set: saving statistics and learning curve
+
+            if X_test is not None:
+                    y_pred_test = self.predict(X_test)
+                    test_metric = self._eval_metric(y_test, y_pred_test)
+                    self.validation_curve[epoch] = test_metric
+                    if self.task == 'classification':
+                        self.test_accuracy_curve[epoch] = get_metric_instance('acc')(y_test, y_pred_test)
+
+            if early_stopping:
+
+                params = [layer.get_params() for layer in self.layers]
+                stop = early_stopping.on_epoch_end(test_metric, y_test, y_pred_test, params)
+
+                if stop:
+                    print(f"Early stopped training on epoch {epoch}")
+                    print(f'Best epoch was {early_stopping._best_epoch}')
+                    best_params = early_stopping._best_params
+                    for layer, layer_best_params in zip(self.layers, best_params):
+                        layer.set_params(layer_best_params)
+                    break
+
+            y_pred = self.predict(X)
+
+            self.learning_curve[epoch] = (self._eval_metric(y_true, y_pred))
+            if self.task == 'classification':
+                self.learning_accuracy_curve[epoch] = get_metric_instance('acc')(y_true, y_pred)
+
+            if verbose:
+                print("Epoch " + str(epoch) + ": " + "metric" + " = " + str(self._eval_metric(y_true, y_pred)))
+
