@@ -1,4 +1,6 @@
 MLenv
+results/Combinations.txt
+results/MonkResultsAll.txt
 src/__pycache__/ActivationFunctions.cpython-310.pyc
 src/__pycache__/BestModelSearch.cpython-310.pyc
 src/__pycache__/EarlyStopping.cpython-310.pyc
@@ -14,5 +16,3 @@ ExperimentsTests.ipynb
 Experiments_Def.ipynb
 benchmark.ipynb
 main.ipynb
-results/Combinations.txt
-results/MonkResultsAll.txt
