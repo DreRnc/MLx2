@@ -365,8 +365,7 @@ class GridSearch():
             if self.verbose:
                 print(f'Random search of: {n_random} combinations')
 
-        elif self.verbose:
-            print(f'Grid search of combinations: {len(par_combinations)}')
+        print(f'Grid search of combinations: {len(par_combinations)}')
 
         self.eta(par_combinations, get_eta)
 
@@ -489,8 +488,7 @@ class RandomGridsearch(GridSearch):
         # If random search is True, it takes n_random random combinations
 
 
-        if self.verbose:
-            print(f'Random search of combinations: {len(par_combinations)}')
+        print(f'Random search of combinations: {len(par_combinations)}')
 
 
         self.grid_search(par_combinations)

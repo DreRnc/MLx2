@@ -222,8 +222,9 @@ class MLP:
                 stop = early_stopping.on_epoch_end(y_test, y_pred_test, params)
 
                 if stop:
-                    print(f"Early stopped training on epoch {epoch}")
-                    print(f'Best epoch was {early_stopping._best_epoch}')
+                    if verbose:
+                        print(f"Early stopped training on epoch {epoch}")
+                        print(f'Best epoch was {early_stopping._best_epoch}')
                     best_params = early_stopping._best_params
                     for layer, layer_best_params in zip(self.layers, best_params):
                         layer.set_params(layer_best_params)
