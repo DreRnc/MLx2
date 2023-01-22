@@ -3,13 +3,13 @@ import numpy as np
 
 class ActivationFunction():
     '''
-    Base class for activation functions
+    Base class for activation functions.
 
-    Methods:
-        __call__(self,x): Output of function not implemented
+    Methods to override:
+        __call__(self,x): Computes function; not implemented
             Input: np.array
             Output: Error
-        derivative(self,x): Derivative of function not implemented
+        derivative(self,x): Computes derivative of function not implemented
             Input: np.array
             Output: Error
     '''
@@ -24,13 +24,13 @@ class ActivationFunction():
 
 class Identity(ActivationFunction):
     '''
-    Identity Activation Function returns the input it gets
+    Identity activation function implementation.
 
     Methods:
-        __call__(self,x): Output of function
+        __call__(self,x): Computes function
             Input: np.array
             Output: np.array
-        derivative(self,x): Derivative of function
+        derivative(self,x): Computes derivative of function
             Input: np.array
             Output: np.array
     '''
@@ -42,13 +42,13 @@ class Identity(ActivationFunction):
 
 class Sigmoid(ActivationFunction):
     '''
-    Computes Sigmoid Activation Function
+    Sigmoid activation function implementation.
 
     Methods:
-        __call__(self,x): Output of function
+        __call__(self,x): Computes function
             Input: np.array
             Output: np.array
-        derivative(self,x): Derivative of function
+        derivative(self,x): Computes derivative of function
             Input: np.array
             Output: np.array
     '''
@@ -61,13 +61,13 @@ class Sigmoid(ActivationFunction):
 
 class Tanh(ActivationFunction):
     '''
-    Computes HyperbolicThangent Activation Function
+    Hyperbolic tangent activation function implementation.
 
     Methods:
-        __call__(self,x): Output of function
+        __call__(self,x): Computes function
             Input: np.array
             Output: np.array
-        derivative(self,x): Derivative of function
+        derivative(self,x): Computes derivative of function
             Input: np.array
             Output: np.array
     '''
@@ -75,18 +75,18 @@ class Tanh(ActivationFunction):
         return np.tanh(x)
     
     def derivative(self, x):
-        return 1-np.square(np.tanh(x))
+        return 1-np.square(self(x))
     
 
 class ReLU(ActivationFunction):
     '''
-    Computes ReLU Activation Function
+    Rectified linear unit activation function implementation.
 
     Methods:
-        __call__(self,x): Output of function
+        __call__(self,x): Computes function
             Input: np.array
             Output: np.array
-        derivative(self,x): Derivative of function
+        derivative(self,x): Computes derivative of function
             Input: np.array
             Output: np.array
     '''
@@ -98,10 +98,15 @@ class ReLU(ActivationFunction):
 
 def get_activation_instance(activation):
     '''
-    Returns the activation function indicated in the input if present
-    Input: String
-        activation: String rapresenting the name of the activation function
-    Output: ActivationFunction
+    Returns an instance of the activation function class indicated in the input, if present, else, returns ValueError.
+
+    Parameters
+    ----------
+    activation (str) : Name/alias of the activation function
+
+    Returns
+    -------
+    (ActivationFunction) : Instance of the requested activation function
     '''
     if activation in ['sigmoid', 'Sigmoid', 'Sigmoid()','sig', 'Sigm', 'sigm']:
         return Sigmoid()

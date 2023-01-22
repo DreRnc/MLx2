@@ -1,36 +1,46 @@
 import numpy as np
 
 class HeavyBallGradient():
+	'''
+    Implementation of Heavy Ball gradient descent optimization algorithm.
+	Variants: rprop for backpropagation, Nesterov for momentum.
 
+	Attributes
+	----------
+	self.step (Float) : learning step
+	self.momentum (Float) : coefficient for momentum, multiplying last step updates for wieghts and biases
+	self.Nesterov (Bool) : whether optimizer must use Nesterov momentum or not
+
+    Methods
+	-------
+	__init__(self, step, momentum):
+		Input:
+			step (Float) : learning step
+			momentum (Float) : coefficient for momentum, multiplying last step updates for wieghts and biases
+			Nesterov (Bool) : whether optimizer must use Nesterov momentum or not
+
+	__call__(self, grad_weights, grad_biases, last_weights_update, last_biases_update, rprop):
+		Input: 
+			grad_weights (np.array) : gradient of the loss with respect to the weights
+			grad_biases (np.array) : gradient of the loss with respect to the biases
+			last_weights_update (np.array) : update on weights of previous step
+			last_biases_update (np.array) : update on biases of previous step
+			rprop (Bool) : whether to apply rprop variant or standard backprop
+		Output:
+			updates on weights (np.array) : update to apply to weights for current optimization step
+			updates on biases (np.array) : update to apply to biases for current optimization step
+    '''
+	
 	def __init__(self, step, momentum, Nesterov):
 		self.step = step
-		self.Nesterov = Nesterov
 		self.momentum = momentum
+		self.Nesterov = Nesterov
 
-	def __call__(self, grad_weights, grad_biases, last_weights_update, last_biases_update, backprop_variant, last_grad_weights, last_grad_biases):
+	def __call__(self, grad_weights, grad_biases, last_weights_update, last_biases_update, rprop):
 
-		if backprop_variant == 'rprop':
+		if rprop:
 			weights_updates, biases_updates = -self.step * np.sign(grad_weights), -self.step * np.sign(grad_biases)
-		elif backprop_variant == 'quickprop' and (last_grad_weights - grad_weights).all() !=0 and (last_grad_biases - grad_biases).all() != 0:
-			self.momentum = 0
-			self.Nesterov = False
-			weights_updates, biases_updates = -self.step * np.divide(np.multiply(last_weights_update, grad_weights), (last_grad_weights - grad_weights)), \
-			-self.step * np.divide(np.multiply(last_biases_update, grad_biases), (last_grad_biases - grad_biases))
 		else:
 			weights_updates, biases_updates = -self.step * grad_weights, -self.step * grad_biases
 
-
-
-		if self.Nesterov:
-			return weights_updates, biases_updates
-		else:
-			return weights_updates + self.momentum * last_weights_update, biases_updates+ self.momentum * last_biases_update
-
-
-# Rprop 
-
-# -self.step*sign(grad_weigths)
-
-# Quickprop
-
-# self.step * last_weigths_update*(grad_weights / (grad_weights - grad_weights_m1))
+		return weights_updates + self.momentum * last_weights_update, biases_updates + self.momentum * last_biases_update
