@@ -24,6 +24,7 @@ class MLP:
     self.validation_curve (np.array) : validation error at every epoch; for plotting validation curve
     self.learning_accuracy_curve (np.array) : training accuracy at every epoch; for plotting learning accuracy curve
     self.test_accuracy_curve (np.array) : test accuracy at every epoch for classification curves
+    self.early_stopping (EarlyStopping) : instance of EarlyStopping class
 
     Methods
     -------
@@ -356,10 +357,10 @@ class RandomizedMLP(MLP):
             
             # Validation/Test Set: saving statistics and learning curve
             if X_test is not None:
-                    y_pred_test = self.predict(X_test)
-                    self.validation_curve[epoch] = self._eval_metric(y_test, y_pred_test)
-                    if self.task == 'classification':
-                        self.test_accuracy_curve[epoch] = get_metric_instance('acc')(y_test, y_pred_test)
+                y_pred_test = self.predict(X_test)
+                self.validation_curve[epoch] = self._eval_metric(y_test, y_pred_test)
+                if self.task == 'classification':
+                    self.test_accuracy_curve[epoch] = get_metric_instance('acc')(y_test, y_pred_test)
 
             # Statistics recording
             y_pred = self.predict(X)
