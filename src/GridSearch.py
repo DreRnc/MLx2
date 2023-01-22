@@ -145,7 +145,7 @@ class GridSearch():
 
         if self.n_folds < 2:
             self.model.fit(self.X_train, self.y_train, **parameters)
-            score = self.model.evaluate_model(self.X_val, self.y_val)
+            score = self.model.evaluate_model(self.X_val, self.y_val, 'mee')
 
         else:
             current_fold = 1
@@ -156,7 +156,7 @@ class GridSearch():
                 y_train, y_val = self.y[train_index], self.y[val_index]
 
                 self.model.fit(X_train, y_train, **parameters)
-                val = self.model.evaluate_model(X_val, y_val)
+                val = self.model.evaluate_model(X_val, y_val, 'mee')
                 score_list.append(val)
                 score += val
                 #del(self.model)
