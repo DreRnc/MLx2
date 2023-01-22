@@ -69,7 +69,7 @@ class FullyConnectedLayer(Layer):
         self.n_units = n_units
         self.n_inputs_per_unit = n_inputs_per_unit
 
-    def initialize(self, weights_initialization, weights_scale, weights_mean, regularization, alpha_l1, alpha_l2, step, momentum, Nesterov, rprop):
+    def initialize(self, weights_initialization, weights_scale, weights_mean, regularization, alpha_l1, alpha_l2, step, momentum, Nesterov, rprop, adaptive_gradient):
 
         """
         Initializes properties of the fully connected layer which are specific for each fit;
@@ -87,6 +87,7 @@ class FullyConnectedLayer(Layer):
         momentum (Float) : coefficient for momentum, multiplying last step updates for wieghts and biases
 		Nesterov (Bool) : whether optimizer must use Nesterov momentum or not
         rprop (Bool) : whether to apply rprop variant or standard backprop
+        adaptive_gradient (bool) : whether to apply adaptive gradient or not
 
         """
         
@@ -112,7 +113,7 @@ class FullyConnectedLayer(Layer):
         self._last_grad_biases = 0
 
         # Optimizer initialization
-        self.optimizer = HeavyBallGradient(step, momentum, Nesterov)
+        self.optimizer = HeavyBallGradient(step, momentum, Nesterov, adaptive_gradient, self.n_inputs_per_unit, self.n_units)
 
         # Rprop: True or False
         self.rprop = rprop
@@ -329,7 +330,7 @@ class Dense(Layer):
         self._fully_connected_layer = FullyConnectedLayer(n_units, n_inputs_per_unit)
         self._activation_layer = ActivationLayer(activation)
 
-    def initialize(self, weights_initialization, weights_scale, weights_mean, regularization, alpha_l1, alpha_l2, step, momentum, Nesterov, rprop):
+    def initialize(self, weights_initialization, weights_scale, weights_mean, regularization, alpha_l1, alpha_l2, step, momentum, Nesterov, rprop, adaptive_gradient):
 
         """
         Initialize properties of the FCL which are specific for each fit.
@@ -347,10 +348,11 @@ class Dense(Layer):
         momentum (Float) : coefficient for momentum, multiplying last step updates for wieghts and biases
 		Nesterov (Bool) : whether optimizer must use Nesterov momentum or not
         rprop (Bool) : whether to apply rprop variant or standard backprop
+        adaptive_gradient (bool) : whether to apply adaptive gradient or not
 
         """
 
-        self._fully_connected_layer.initialize(weights_initialization, weights_scale, weights_mean, regularization, alpha_l1, alpha_l2, step, momentum, Nesterov, rprop)
+        self._fully_connected_layer.initialize(weights_initialization, weights_scale, weights_mean, regularization, alpha_l1, alpha_l2, step, momentum, Nesterov, rprop, adaptive_gradient)
 
     def get_params(self):
 

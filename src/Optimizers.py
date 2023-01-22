@@ -31,16 +31,44 @@ class HeavyBallGradient():
 			updates on biases (np.array) : update to apply to biases for current optimization step
     '''
 	
-	def __init__(self, step, momentum, Nesterov):
+	def __init__(self, step, momentum, Nesterov, adaptive_grad, n_inputs, n_units):
 		self.step = step
 		self.momentum = momentum
 		self.Nesterov = Nesterov
+
+		if adaptive_grad is True:
+			self.ada_grad = AdagGrad(n_inputs, n_units)
+		else:
+			self.ada_grad = None
 
 	def __call__(self, grad_weights, grad_biases, last_weights_update, last_biases_update, rprop):
 
 		if rprop:
 			weights_updates, biases_updates = -self.step * np.sign(grad_weights), -self.step * np.sign(grad_biases)
-		else:
+		elif self.ada_grad is None:
 			weights_updates, biases_updates = -self.step * grad_weights, -self.step * grad_biases
-
+		else:
+			weights_updates, biases_updates = self.ada_grad(grad_weights, grad_biases, self.step)
+		
 		return weights_updates + self.momentum * last_weights_update, biases_updates + self.momentum * last_biases_update
+
+class AdagGrad():
+	def _init_(self, n_inputs, n_units):
+		
+		self.epsilon = 1e-07
+		# create a matrix of zeros with columns as the number of inputs and rows as the number of units
+		self.Grad_weights = np.zeros((n_inputs, n_units))
+		self.Grad_biases = np.zeros(( 1, n_units))
+		self.waiting = 0
+
+	def _call_(self, grad_weights, grad_biases, step):
+		self.waiting = self.waiting + 1
+
+		if self.waiting < 0:
+			return -step * grad_weights, -step * grad_biases
+		else: 
+
+			self.Grad_weights = np.square(grad_weights) + self.Grad_weights
+			self.Grad_biases = np.square(grad_biases)	+ self.Grad_biases
+		
+			return np.multiply(np.divide(- step , np.sqrt(self.Grad_weights + self.epsilon)) , grad_weights) , -step * grad_biases

@@ -103,7 +103,7 @@ class MLP:
     def fit(self, X, y_true, n_epochs, batch_size = -1, X_test = None, y_test = None, error = "MSE", eval_metric = "default", \
         regularization = "no", alpha_l1 = 0, alpha_l2 = 0, weights_initialization = "scaled", weights_scale = 0.01, \
         weights_mean = 0, step = 0.1, momentum = 0, Nesterov = False, rprop = False, early_stopping = True, \
-        patience = 10, tolerance = 0.01, validation_split_ratio = 0.1, random_seed = 0, verbose = False):
+        patience = 10, tolerance = 0.01, validation_split_ratio = 0.1, random_seed = 0, verbose = False, adaptive_gradient = False):
 
         """
         Fits the MLP on a set, given an error function and the necessary hyperparameters.
@@ -176,7 +176,7 @@ class MLP:
 
         # Initialize layers
         for layer in self.layers:
-            layer.initialize(weights_initialization, weights_scale, weights_mean, regularization, alpha_l1, alpha_l2, step, momentum, Nesterov, rprop)
+            layer.initialize(weights_initialization, weights_scale, weights_mean, regularization, alpha_l1, alpha_l2, step, momentum, Nesterov, rprop, adaptive_gradient)
 
         # Training
         for epoch in range(n_epochs):
@@ -234,6 +234,12 @@ class MLP:
                     self.learning_accuracy_curve = self.learning_accuracy_curve[:epoch] 
                     self.test_accuracy_curve = self.test_accuracy_curve[:epoch]
                     break
+                elif epoch == n_epochs - 1:
+                    best_params = early_stopping._best_params
+                    for layer, layer_best_params in zip(self.layers, best_params):
+                        layer.set_params(layer_best_params)
+
+
 
     def predict(self, X):
 
@@ -277,7 +283,7 @@ class RandomizedMLP(MLP):
 
     def fit(self, X, y_true, n_epochs, batch_size, X_test = None, y_test = None, error = "MSE", eval_metric = "default", regularization = "no", \
         alpha_l1 = 0, alpha_l2 = 0, weights_initialization = "scaled", weights_scale = 0.01, weights_mean = 0, step = 0.1, momentum = 0, Nesterov = False, rprop = False, \
-        early_stopping = True, validation_split_ratio = 0.1, random_seed = 0, verbose = False, patience = 10, tolerance = 0.01):
+        early_stopping = True, validation_split_ratio = 0.1, random_seed = 0, verbose = False, patience = 10, tolerance = 0.01, adaptive_gradient = False):
 
         """
         Fits the weigths and biases of only the last layer of MLP.
@@ -324,7 +330,7 @@ class RandomizedMLP(MLP):
 
         # Initialize layers
         for layer in self.layers:
-            layer.initialize(weights_initialization, weights_scale, weights_mean, regularization, alpha_l1, alpha_l2, step, momentum, Nesterov, rprop)
+            layer.initialize(weights_initialization, weights_scale, weights_mean, regularization, alpha_l1, alpha_l2, step, momentum, Nesterov, rprop, adaptive_gradient)
 
         # Training
         for epoch in range(n_epochs):

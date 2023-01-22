@@ -118,6 +118,35 @@ class MSE(ErrorFunction):
 
         return 2 * (y_pred - y_true) / (y_true.shape[0]*y_true.shape[1])
 
+class MEE(ErrorFunction):
+    '''
+    Computes the mean eculidean distance between two np.arrays of any size.
+
+    Methods:
+        __call__(self,y_true, y_pred): Returns the mean euclidean distance
+            Input: 2 np.arrays of the same shape
+                y_true (np.array) : ground truth values
+                y_pred (np.array) : predicted values
+            Output: Float
+
+    '''
+    
+    def _call_(self, y_true, y_pred):
+        """
+        Computes mean euclidean error between predictions and ground truth values.
+
+        Parameters
+        ----------
+        y_true (np.array) : ground truth values
+        y_pred (np.array) : predicted values
+
+        Returns
+        -------
+        MEE (float), i.e. mean euclidean error between predictions and ground truth values
+        """
+        return np.mean(np.linalg.norm(y_pred - y_true, axis=1))
+
+        
 class MAE(ErrorFunction):
     '''
     Computes the mean absolute error between two np.arrays of any size.
@@ -144,7 +173,7 @@ class MAE(ErrorFunction):
 
         Returns
         -------
-        MAE (float), i.e. mean absolute error between predictions and ground truth values.
+        MAE (float), i.e. mean absolute error between predictions and ground truth values
         """
 
         if y_true.shape != y_pred.shape:
@@ -185,9 +214,11 @@ def get_metric_instance(metric):
     '''
     if metric in  ["MSE", "mean_squared_error",'mse','mean squared error']:
         return MSE()	
-    elif metric in ["MAE", "mean_absolute_error",'mae','mean absolute error','mee','MEE','mean expected error','Mean Expected Error']:
+    elif metric in ["MAE", "mean_absolute_error",'mae','mean absolute error']:
         return MAE()
     elif metric in ["Accuracy", "accuracy", "acc", "ACC", "ACCURACY",'a']:
         return Accuracy()
+    elif metric in ["MEE", "mean_expected_error",'mee','mean expected error','Mean Expected Error']:
+        return MEE()
     else:
         raise ValueError("Metric function not found")
