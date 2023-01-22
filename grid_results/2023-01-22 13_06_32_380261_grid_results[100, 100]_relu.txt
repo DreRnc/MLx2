@@ -1,0 +1,1 @@
+{"step": [0.1, 0.05, 0.01], "momentum": [0], "batch_size": [1188], "alpha_l2": [0.01, 0.001, 0], "alpha_l1": [0.01, 0.001, 0], "Nesterov": [false], "rprop": ["no"], "weights_scale": [0.2, 0.1, 0.05], "weights_initialization": ["scaled"], "regularization": ["elastic"], "n_epochs": [3000], "tolerance": [1e-06], "patience": [50]}
