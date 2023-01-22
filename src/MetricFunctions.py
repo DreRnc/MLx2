@@ -131,7 +131,7 @@ class MEE(ErrorFunction):
 
     '''
     
-    def _call_(self, y_true, y_pred):
+    def __call__(self, y_true, y_pred):
         """
         Computes mean euclidean error between predictions and ground truth values.
 
