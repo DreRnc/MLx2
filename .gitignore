@@ -16,6 +16,10 @@ ExperimentsTests.ipynb
 Experiments_Def.ipynb
 benchmark.ipynb
 main.ipynb
+<<<<<<< HEAD
 main.ipynb
 random_mlp.ipynb
 main.ipynb
+=======
+JointExperiments.ipynb
+>>>>>>> 30d5fd7fa865cca5ffc873f44e35661c3ae5e141

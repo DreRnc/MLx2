@@ -255,10 +255,10 @@ class GridSearch():
         elif self.model.task == 'classification':
             self.results.sort(key = lambda x: x[0], reverse = True)
         
-        
-        print('\n')
-        print(f'Best parameters: {self.results[0][1]}')
-        print(f'Best score: {self.results[0][0]}')
+        if self.verbose:
+            print('\n')
+            print(f'Best parameters: {self.results[0][1]}')
+            print(f'Best score: {self.results[0][0]}')
 
 
         self.best_parameters = self.results[0][1]
@@ -320,7 +320,7 @@ class GridSearch():
                 self.par.append(out[1])
 
 
-    def fit(self, X, y, parameters_grid, n_folds = 1, stratified = False, test_size = 0.2, verbose = False, parallel = False, random_search = False, n_random = 10, get_eta = False):
+    def fit(self, X, y, parameters_grid, n_folds = 1, stratified = False, test_size = 0.2, verbose = True, parallel = False, random_search = False, n_random = 10, get_eta = False):
         
         '''
         Performs the grid search.

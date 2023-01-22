@@ -37,7 +37,7 @@ class HeavyBallGradient():
 		self.Nesterov = Nesterov
 
 		if adaptive_grad is True:
-			self.ada_grad = AdaGrad(n_inputs, n_units)
+			self.ada_grad = AdagGrad(n_inputs, n_units)
 		else:
 			self.ada_grad = None
 
@@ -52,9 +52,8 @@ class HeavyBallGradient():
 		
 		return weights_updates + self.momentum * last_weights_update, biases_updates + self.momentum * last_biases_update
 
-class AdaGrad():
-
-	def __init__(self, n_inputs, n_units):
+class AdagGrad():
+	def _init_(self, n_inputs, n_units):
 		
 		self.epsilon = 1e-07
 		# create a matrix of zeros with columns as the number of inputs and rows as the number of units
@@ -62,7 +61,7 @@ class AdaGrad():
 		self.Grad_biases = np.zeros(( 1, n_units))
 		self.waiting = 0
 
-	def __call__(self, grad_weights, grad_biases, step):
+	def _call_(self, grad_weights, grad_biases, step):
 		self.waiting = self.waiting + 1
 
 		if self.waiting < 0:
