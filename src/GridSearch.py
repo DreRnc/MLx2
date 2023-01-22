@@ -279,10 +279,14 @@ class GridSearch():
         rand_int = rand_int.replace('.', '_')
 
 
+        """
+        Decomment to save results in files:
+        
         with open(f'grid_results/{rand_int}_grid_results{self.model.hidden_layer_units}_{self.model.activation_function}.txt', 'w') as f:
             json.dump(self.parameters_grid, f)
 
         np.save(f'grid_results/{rand_int}_grid_results{self.model.hidden_layer_units}_{self.model.activation_function}.npy', self.results)
+        """
 
 
     def grid_search(self, par_combinations):

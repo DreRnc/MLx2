@@ -78,7 +78,6 @@ class SVM:
 
 
 
-        # COPILOT
         # { ||w||: [w,b] }
         opt_dict = {}
     

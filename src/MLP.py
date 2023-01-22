@@ -53,6 +53,7 @@ class MLP:
         self.input_size = input_size
         self.output_size = output_size
         self.task = task
+        self.early_stopping = None
         
         self.hidden_layer_units = hidden_layer_units
         self.activation_function = activation_function
@@ -155,7 +156,7 @@ class MLP:
         
         # Initializes EarlyStopping
         if early_stopping:
-            early_stopping = EarlyStopping(patience = patience, tolerance = tolerance, metric = self._eval_metric)
+            self.early_stopping = EarlyStopping(patience = patience, tolerance = tolerance, metric = self._eval_metric)
             X, X_test, y_true, y_test = train_test_split(X, y_true, test_size = validation_split_ratio, shuffle = True, random_state = random_seed)
 
         # Checks on sizes of MLP and sets
@@ -219,13 +220,13 @@ class MLP:
             if early_stopping:
 
                 params = [layer.get_params() for layer in self.layers]
-                stop = early_stopping.on_epoch_end(y_test, y_pred_test, params)
+                stop = self.early_stopping.on_epoch_end(y_test, y_pred_test, params)
 
                 if stop:
                     if verbose:
                         print(f"Early stopped training on epoch {epoch}")
-                        print(f'Best epoch was {early_stopping._best_epoch}')
-                    best_params = early_stopping._best_params
+                        print(f'Best epoch was {self.early_stopping._best_epoch}')
+                    best_params = self.early_stopping._best_params
                     for layer, layer_best_params in zip(self.layers, best_params):
                         layer.set_params(layer_best_params)
 
@@ -236,7 +237,7 @@ class MLP:
                     self.test_accuracy_curve = self.test_accuracy_curve[:epoch]
                     break
                 elif epoch == n_epochs - 1:
-                    best_params = early_stopping._best_params
+                    best_params = self.early_stopping._best_params
                     for layer, layer_best_params in zip(self.layers, best_params):
                         layer.set_params(layer_best_params)
 
@@ -282,9 +283,10 @@ class RandomizedMLP(MLP):
 
     """
 
-    def fit(self, X, y_true, n_epochs, batch_size, X_test = None, y_test = None, error = "MSE", eval_metric = "default", regularization = "no", \
-        alpha_l1 = 0, alpha_l2 = 0, weights_initialization = "scaled", weights_scale = 0.01, weights_mean = 0, step = 0.1, momentum = 0, Nesterov = False, rprop = False, \
-        early_stopping = True, validation_split_ratio = 0.1, random_seed = 0, verbose = False, patience = 10, tolerance = 0.01, adaptive_gradient = False):
+    def fit(self, X, y_true, n_epochs, batch_size = -1, X_test = None, y_test = None, error = "MSE", eval_metric = "default", \
+        regularization = "elastic", alpha_l1 = 0, alpha_l2 = 0, weights_initialization = "scaled", weights_scale = 0.01, \
+        weights_mean = 0, step = 0.1, momentum = 0, Nesterov = False, rprop = False, early_stopping = True, \
+        patience = 10, tolerance = 0.01, validation_split_ratio = 0.1, random_seed = 0, verbose = False, adaptive_gradient = False):
 
         """
         Fits the weigths and biases of only the last layer of MLP.
@@ -310,7 +312,7 @@ class RandomizedMLP(MLP):
         
         # Initializes EarlyStopping
         if early_stopping:
-            early_stopping = EarlyStopping(patience = patience, tolerance = tolerance, metric = self._eval_metric)
+            self.early_stopping = EarlyStopping(patience = patience, tolerance = tolerance, metric = self._eval_metric)
             X, X_test, y_true, y_test = train_test_split(X, y_true, test_size = validation_split_ratio, shuffle = True, random_state = random_seed)
 
         # Checks on sizes of MLP and sets
@@ -372,12 +374,13 @@ class RandomizedMLP(MLP):
             if early_stopping:
 
                 params = [layer.get_params() for layer in self.layers]
-                stop = early_stopping.on_epoch_end(y_test, y_pred_test, params)
+                stop = self.early_stopping.on_epoch_end(y_test, y_pred_test, params)
 
                 if stop:
-                    print(f"Early stopped training on epoch {epoch}")
-                    print(f'Best epoch was {early_stopping._best_epoch}')
-                    best_params = early_stopping._best_params
+                    if verbose:
+                        print(f"Early stopped training on epoch {epoch}")
+                        print(f'Best epoch was {self.early_stopping._best_epoch}')
+                    best_params = self.early_stopping._best_params
                     for layer, layer_best_params in zip(self.layers, best_params):
                         layer.set_params(layer_best_params)
 
@@ -387,3 +390,7 @@ class RandomizedMLP(MLP):
                     self.learning_accuracy_curve = self.learning_accuracy_curve[:epoch] 
                     self.test_accuracy_curve = self.test_accuracy_curve[:epoch]
                     break
+                elif epoch == n_epochs - 1:
+                    best_params = self.early_stopping._best_params
+                    for layer, layer_best_params in zip(self.layers, best_params):
+                        layer.set_params(layer_best_params)
