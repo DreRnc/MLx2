@@ -101,7 +101,7 @@ class MLP:
         return eval_metric(y_true, y_pred)
 
     def fit(self, X, y_true, n_epochs, batch_size = -1, X_test = None, y_test = None, error = "MSE", eval_metric = "default", \
-        regularization = "no", alpha_l1 = 0, alpha_l2 = 0, weights_initialization = "scaled", weights_scale = 0.01, \
+        regularization = "elastic", alpha_l1 = 0, alpha_l2 = 0, weights_initialization = "scaled", weights_scale = 0.01, \
         weights_mean = 0, step = 0.1, momentum = 0, Nesterov = False, rprop = False, early_stopping = True, \
         patience = 10, tolerance = 0.01, validation_split_ratio = 0.1, random_seed = 0, verbose = False, adaptive_gradient = False):
 
