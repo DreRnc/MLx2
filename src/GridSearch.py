@@ -1,14 +1,12 @@
 from sklearn.model_selection import KFold, StratifiedKFold
 from sklearn.model_selection import train_test_split
 from itertools import product
-from src.MetricFunctions import get_metric_instance, ErrorFunction
 import random
 import concurrent.futures
 import time
 import numpy as np
 import json
 from tqdm import tqdm
-from sklearn.gaussian_process import GaussianProcessRegressor
 import os
 
 def print_grid_results(path, k_fold = True, task = 'regression', n_results = 1):
@@ -17,14 +15,11 @@ def print_grid_results(path, k_fold = True, task = 'regression', n_results = 1):
     
     Parameters
     ----------
-    path (String): The path to the file containing the results
-    k_fold (Boolean): If the grid search was performed with k-fold cross validation
-    task (String): The task of the model, either 'regression' or 'classification'
-    n_results (int): The number of best results to be printed
+    path (str): the path to the file containing the results
+    k_fold (bool): if the grid search was performed with k-fold cross validation
+    task (str): the task of the model, either 'regression' or 'classification'
+    n_results (int): the number of best results to be printed
 
-    Returns
-    -------
-    None
     '''
 
     results = np.load(path, allow_pickle = True)
@@ -37,13 +32,16 @@ def print_grid_results(path, k_fold = True, task = 'regression', n_results = 1):
         results.sort(key = lambda x: x[0], reverse = True)
 
     if k_fold == True:
-        # find the model with lowest highest score_list
+
+        # Find the model with lowest highest score_list
         best_score_list = [i[2] for i in results]
         best_score_par = [i[1] for i in results]
         best_score_loss = [i[0] for i in results]
-        # find highest value for every list
+
+        # Find highest value for every list
         best_score_list_max = [max(i) for i in best_score_list]
-        # find the index of the lowest value
+
+        # Find the index of the lowest value
         index = best_score_list_max.index(min(best_score_list_max))
 
         low_max_loss = best_score_loss[index]
@@ -70,25 +68,45 @@ def print_grid_results(path, k_fold = True, task = 'regression', n_results = 1):
 
 class GridSearch():
     '''
-    Class for Grid Search
+    Class for Grid Search.
 
     Attributes
     ----------
-    model (Model): The model to be optimized, after the fit method is called it contains the best model found
-    parameters_grid (Dictionary): The combinations of parameters to be tested
-    loss_function (MetricFunction): The loss function to be used in the optimization
-    n_results (Int): The number of results to be returned
-    best_parameters (List): The parameters of the best performing model
-    best_score (Float): The best score achived
-    best_model (Model): The best model found trained on the whole dataset provided
+    self.model (MLP): the model to be optimized, after the fit method is called it contains the best model found
+    self.parameters_grid (dict): the combinations of parameters to be tested
+    self.n_results (int): the number of results to be returned
+    self.results (list) : list of results of the search
+    self.scores (list) : list of mean scores of various combinations
+    self.scores_list (list) : list of scores for each fold, for each combination
+    self.par (list) : list of parameter combination dictionaries
+    self.best_parameters (list): the parameters of the best performing model
+    self.best_score (float): the best score achieved
+    self.best_model (MLP): the best model found, trained on the whole dataset provided
+    self.n_folds (int) : number of folds for kfold cross validation
+    self.folds (list) : list of folds for cross validation
+    self.X (np.array) : input variables of dataset 
+    self.y (np.array) : target variables of dataset
+    self.X_train (np.array) : input variables of training set after trainin/validation split
+    self.y_train (np.array) : target variables of training set after trainin/validation split
+    self.X_val (np.array) : input variables of validation set after trainin/validation split
+    self.y_val (np.array) : target variables of validation set after trainin/validation split
+    self.test_size (float) : training/validation split ratio of set
+    self.parallel (bool) : whether to parallelize processes or not
+    self.verbose (bool) : whether to activate verbose mode
+    self.i (int) : parameter useful for verbose mode
 
 
     Methods
     -------
-    fit(X, y, n_folds = 1, test_size = 0.2, random_state = None, verbose = False, n_jobs = 1, **parameters_grid):
-        Performs the grid search and saves the best parameters and the best model
-    get_best_parameters(n_results = 1, all = False): 
-        Returns the best n parameters found with the scores
+    __init__ : initializes GridSearch object
+    compute : compute the score of a combination of parameters
+    create_folds : creates the folds for the cross validation
+    eta : compute the eta of the grid search
+    clean_output : cleans the output of the grid search
+    grid_search : performs the grid search
+    fit : performs the grid search and saves the best parameters and the best model
+    get_best_parameters : returns the best n parameters found with the scores
+
     '''
 
 
@@ -99,7 +117,6 @@ class GridSearch():
         Parameters
         ----------
         model (Model): The model to be optimized
-        loss_function (MetricFunction): The loss function to be used in the optimization
         '''
 
         self.model = model
@@ -107,7 +124,7 @@ class GridSearch():
     def compute(self, values, l):
 
         '''
-        This method is used to compute the score of a combination of parameters
+        Compute the score of a combination of parameters.
 
         Parameters
         ----------
@@ -162,7 +179,7 @@ class GridSearch():
 
     def create_folds(self, n_folds, stratified):
         '''
-        Creates the folds for the cross validation
+        Creates the folds for the cross validation.
 
         Parameters
         ----------
@@ -195,7 +212,7 @@ class GridSearch():
 
     def eta(self, par_combinations, get_eta):
         '''
-        This method is used to compute the eta of the grid search
+        Compute the eta of the grid search.
 
         Parameters
         ----------
@@ -226,7 +243,7 @@ class GridSearch():
 
     def clean_output(self):
         '''
-        This method is used to clean the output of the grid search
+        Clean the output of the grid search
         '''
         if self.n_folds > 1:
             self.results = [ [self.scores[i], self.par[i], self.scores_list[i] ] for i in range(len(self.scores)) ]
@@ -269,8 +286,9 @@ class GridSearch():
 
 
     def grid_search(self, par_combinations):
+
         '''
-        This method is used to perform the grid search
+        Perform the grid search.
 
         Parameters
         ----------
@@ -301,12 +319,12 @@ class GridSearch():
     def fit(self, X, y, parameters_grid, n_folds = 1, stratified = False, test_size = 0.2, verbose = True, parallel = False, random_search = False, n_random = 10, get_eta = False):
         
         '''
-        Performs the grid search
+        Performs the grid search.
 
         Parameters
         ----------
-        X (np.array): The input data
-        y (np.array): The output data
+        X (np.array): the input data
+        y (np.array): the output data
         parameters_grid (Dictionary): The values of parameters to be tested
         n_folds (Int > 1): The number of folds to be used in the cross validation
         stratified (Bool): If True the folds are stratified
@@ -378,7 +396,6 @@ class GridSearch():
             return self.results
         else:
             return self.results[:n_parameters]
-
 
 
 class RandomGridsearch(GridSearch):
@@ -479,7 +496,3 @@ class RandomGridsearch(GridSearch):
         self.grid_search(par_combinations)
 
         self.clean_output()
-
-
-
-        

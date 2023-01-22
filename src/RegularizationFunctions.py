@@ -2,19 +2,23 @@ import numpy as np
 
 class RegularizationFunction():
     '''
-    Base class for regularization functions
+    Base class for regularization functions.
 
     Methods to override:
-        __init__(self,alpha=0.1): Initialises the class with the apha parameter not implemented
-            Input: Float
-        __call__(self,w): Output of function not implemented
-            Input: np.array
+        __init__(self, alpha_l1, alpha_l2): Initialises the class with the alpha parameters; not implemented
+            Input:
+                alpha_l1 (Float) : parameter for L1 component
+                alpha_l2 (Float) : parameter for L2 component
+        __call__(self,w): Output of function; not implemented
+            Input: 
+                w (np.array) : weights
             Output: Error
-        derivative(self,w): Derivative of function not implemented
-            Input: np.array
+        derivative(self,w): Derivative of function; not implemented
+            Input: 
+                w (np.array) : weights
             Output: Error
     '''
-    def __init__(self):
+    def __init__(self, alpha_l1, alpha_l2):
         raise NotImplementedError
     def __call__(self, w):
         raise NotImplementedError
@@ -23,19 +27,25 @@ class RegularizationFunction():
 
 class ElasticReg(RegularizationFunction):
     '''
-    Computes the ElasticNet regularization effect, which is a sum of L1 and L2
+    Base class for regularization functions.
 
     Methods:
-        __init__(self,alpha=0.1): Initialises the class with the L1 and L2 apha parameter, default 0.1,0.1
-            Input: 2 separated Floats
-        __call__(self,w): Output of function
-            Input: np.array
-            Output: Float
-        derivative(self,w): Derivative of function
-            Input: np.array
-            Output: np.array
-        
+        __init__(self, alpha_l1, alpha_l2): Initialises the class with the alpha parameters; not implemented
+            Input:
+                alpha_l1 (Float) : parameter for L1 component
+                alpha_l2 (Float) : parameter for L2 component
+        __call__(self,w): Output of function; not implemented
+            Input: 
+                w (np.array) : weights
+            Output: 
+                (Float) : value of regularization function
+        derivative(self,w): Derivative of function; not implemented
+            Input: 
+                w (np.array) : weights
+            Output: 
+                (Float) : derivative of regularization function with respect to weights
     '''
+
     def __init__(self, alpha_l1, alpha_l2):
         self.alpha_l1 = alpha_l1
         self.alpha_l2 = alpha_l2
@@ -48,39 +58,43 @@ class ElasticReg(RegularizationFunction):
 
 class L1Reg(ElasticReg):
     '''
-    Computes the L2 (Ridge) regularization effect, which is the squared sum of weights in the model
-
+    Computes the L1 (Lasso) regularization function, which is the sum of the absolute value of the weights in the model.
     '''
+
     def __init__(self, alpha_l1, alpha_l2):
-        super().__init__(alpha_l1, alpha_l2)
-        self.alpha_l2 = 0
+        super().__init__(alpha_l1, 0)
 
 class L2Reg(ElasticReg):
     '''
-    Computes the L2 (Ridge) regularization effect, which is the squared sum of weights in the model
-
+    Computes the L2 (Ridge) regularization effect, which is the sum of the squared weights in the model.
     '''
+
     def __init__(self, alpha_l1, alpha_l2):
-        super().__init__(alpha_l1, alpha_l2)
-        self.alpha_l1 = 0
+        super().__init__(0, alpha_l2)
 
 
 class NoReg(ElasticReg):
-
+    '''
+    Computes no regularization, i.e. call and derivative return zero.
+    '''
     def __init__(self, alpha_l1, alpha_l2):
-        super().__init__(alpha_l1, alpha_l2)
-        self.alpha_l1 = 0
-        self.alpha_l2 = 0
+        super().__init__(0, 0)
+
 
 
 def get_regularization_instance(reg_type, alpha_l1, alpha_l2):
     '''
-    Returns the activation function indicated in the input if present
+    Returns an instance of the regularization function class indicated in the input, if present, else returns ValueError.
 
-    Input: String and float
-        reg_type: String rapresenting the name of the regularization function
-        alpha: Float rapresenting the regularization parameter
-    Output: RegularizationFunction
+    Parameters
+    ----------
+    reg_type (str) : Name/alias of the regularization function
+    alpha_l1 (Float) : value of alpha_l1 parameter
+    alpha_l2 (Float) : value of alpha_l2 parameter
+
+    Returns
+    -------
+    (RegularizationFunction) : Instance of the requested regularization function
     '''
     if reg_type in ['L1', 'Lasso', 'lasso', 'l1']:
         return L1Reg(alpha_l1, alpha_l2)
