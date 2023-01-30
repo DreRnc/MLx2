@@ -45,6 +45,8 @@ class SVR:
         elif self.kernel == 'polynomial':
             return (np.dot(x1, x2) + self.offset)**self.degree
         elif self.kernel == 'rbf':
+            if self.gamma == 'auto':
+                self.gamma = 1.0 / x1.shape[0]
             return np.exp(-self.gamma * np.linalg.norm(x1 - x2)**2)
         else:
             raise ValueError('Invalid kernel function')

@@ -1,6 +1,8 @@
 from sklearn.model_selection import KFold, StratifiedKFold
 from sklearn.model_selection import train_test_split
 from itertools import product
+from src.MLP import MLP
+from src.svr2 import MultiOutputSVR
 import random
 import concurrent.futures
 import time
@@ -280,9 +282,14 @@ class GridSearch():
         rand_int = rand_int.replace(':', '_')
         rand_int = rand_int.replace('.', '_')
 
-        df = pd.DataFrame(self.results)
-        df.to_csv(f'grid_results/{rand_int}_grid_results{self.model.hidden_layer_units}_{self.model.activation_function}.csv', index = False)
+        if isinstance(self.model, MultiOutputSVR):
+            df = pd.DataFrame(self.results)
+            df.to_csv(f'grid_results/{rand_int}_grid_results_svr_{self.model.kernel}.csv', index = False)
 
+        if isinstance(self.model, MLP):
+            df = pd.DataFrame(self.results)
+            df.to_csv(f'grid_results/{rand_int}_grid_results_mlp_{self.model.hidden_layer_units}_{self.model.activation_function}.csv', index = False)
+        
 
     def grid_search(self, par_combinations):
 
