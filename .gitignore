@@ -1,3 +1,4 @@
 MLenv
 results
-src/__pycache__s
+src/__pycache__
+data/__pycache__
